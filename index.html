@@ -377,6 +377,40 @@ button{font:inherit;color:inherit}
 .helper{font-size:12.5px;color:var(--faint);margin-top:14px}
 .centerc{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;padding:20px 0}
 
+/* ---------- module 2 · bioinformatics (terminal screens) ---------- */
+#steps .mod{margin:18px 6px 0;padding-top:14px;border-top:1px solid var(--line);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600}
+.mapmod{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:20px 0 10px}
+.term{background:var(--screen);border:1px solid var(--screen-line);border-radius:14px;padding:16px 18px;overflow-x:auto}
+.term .tlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#71829C;margin-bottom:12px}
+.brow{display:flex;gap:3px;align-items:center;font-family:var(--mono);width:max-content}
+.bcell{width:26px;height:26px;flex:0 0 26px;border-radius:5px;display:grid;place-items:center;font-size:13px;font-weight:600;background:#16203A;color:#C9D6E8;border:1px solid #26364F}
+.bcell.dimq{opacity:.4}
+.bcell.refm{background:transparent;border-color:#1D2A44;color:#8FA3BF}
+.bcell.match{background:rgba(74,222,128,.16);border-color:rgba(74,222,128,.55);color:#7EE9A2}
+.bcell.mis{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.5);color:#FCA5A5}
+.bcell.adap{background:rgba(251,191,36,.13);border-color:rgba(251,191,36,.5);color:#FCD34D}
+.bcell.gapc{background:rgba(53,211,194,.10);border-color:rgba(53,211,194,.45);color:var(--glow)}
+.qrow{display:flex;gap:3px;margin-top:5px;width:max-content}
+.qb{width:26px;flex:0 0 26px;height:36px;display:flex;align-items:flex-end;justify-content:center}
+.qb i{display:block;width:12px;border-radius:2px 2px 0 0}
+.rowlab{font-family:var(--mono);font-size:11px;color:#71829C;margin-left:10px;align-self:center;white-space:nowrap}
+.alnbox{position:relative;width:max-content;padding-bottom:44px}
+.readstrip{position:absolute;display:flex;gap:3px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transition:left .12s}
+.readstrip.sliding{transition:none;cursor:grabbing}
+.gapslot{position:absolute;top:0;width:14px;height:26px;border-radius:4px;background:rgba(255,255,255,.07)}
+.pilewrap{position:relative;width:max-content}
+.pilerow{position:absolute;display:flex;gap:3px;transition:top .7s cubic-bezier(.5,0,.3,1),opacity .5s}
+.pilerow.dup{opacity:.3;filter:saturate(.3)}
+.duptag{font-family:var(--mono);font-size:10px;color:#FCA5A5;border:1px solid rgba(248,113,113,.5);border-radius:4px;padding:1px 5px;margin-left:8px;align-self:center}
+.colzone{position:absolute;width:26px;border-radius:6px}
+.report{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:16px 20px;min-width:290px;font-size:14px}
+.report .rrow{display:flex;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line);align-items:center}
+.report .rrow:last-child{border-bottom:none}
+.report .rk{font-family:var(--mono);font-size:11px;color:var(--faint);flex:0 0 112px;text-transform:uppercase;letter-spacing:.08em}
+.report .rv{font-weight:600}
+.report .rv.pend{color:var(--faint);font-weight:400}
+.slotbox{border:2px dashed var(--line);border-radius:8px;min-height:32px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:12.5px;padding:2px 12px}
+
 @media (max-width:880px){
   #app{flex-direction:column}
   #rail{width:auto;flex:none;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;padding:12px 14px;gap:14px;border-right:none;border-bottom:1px solid var(--line-soft)}
@@ -549,6 +583,9 @@ const GL={
   adapter:c=>`<svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 12 5 4M12 12l7-8M12 12v9" stroke="#5A6E8C" stroke-width="2.6" stroke-linecap="round"/><rect x="8.5" y="17" width="7" height="6" rx="2" fill="${c}"/></svg>`,
   probe:c=>`<svg width="26" height="20" viewBox="0 0 26 20"><path d="M2 12q3-7 6 0t6 0 6 0" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/><circle cx="23" cy="6" r="3.2" fill="#EDE28A"/></svg>`,
   zap:()=>`<svg width="20" height="24" viewBox="0 0 20 24"><path d="M11 2 3 14h6l-2 8 10-13h-6z" fill="#FBBF24"/></svg>`,
+  scis:()=>`<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="6" cy="17" r="3" fill="none" stroke="#5A6E8C" stroke-width="2"/><circle cx="6" cy="7" r="3" fill="none" stroke="#5A6E8C" stroke-width="2"/><path d="M8.5 15.5 20 4M8.5 8.5 20 20" stroke="#B54B45" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+  flag:c=>`<svg width="20" height="24" viewBox="0 0 20 24"><path d="M5 22V3" stroke="#5A6E8C" stroke-width="2.2" stroke-linecap="round"/><path d="M5 4h11l-3.2 4 3.2 4H5z" fill="${c}"/></svg>`,
+  chipbase:(c,t)=>`<span style="width:22px;height:22px;border-radius:6px;background:${c};color:#fff;font-family:var(--mono);font-weight:600;font-size:13px;display:grid;place-items:center">${t||""}</span>`,
 };
 
 /* ============================ scene plumbing ============================ */
@@ -567,11 +604,12 @@ function unDone(){doneFlags[current]=false;$("#nextBtn").disabled=true;}
 
 function renderRail(){
   const ol=$("#steps");ol.innerHTML="";
-  let lastGrp=null;
+  let lastGrp=null,lastMod=null;
   SCENES.forEach((s,i)=>{
+    if(s.mod&&s.mod!==lastMod){ol.append(el("div","mod",s.mod));lastMod=s.mod;}
     if(s.grp!==lastGrp){ol.append(el("div","grp",s.grp));lastGrp=s.grp;}
     const li=el("li","step"+(i===current?" on":"")+(i<unlocked||doneFlags[i]?" done":""));
-    const b=el("button","", `<span class="dot">${i===0?"·":i}</span><span class="lbl">${s.label}</span>`);
+    const b=el("button","", `<span class="dot">${s.dot||(i===0?"·":i)}</span><span class="lbl">${s.label}</span>`);
     b.disabled=i>unlocked;
     b.addEventListener("click",()=>go(i));
     li.append(b);ol.append(li);
@@ -605,12 +643,12 @@ const SCENES=[
 /* ---------------- 0 · Overview ---------------- */
 {
   label:"Overview",grp:"Start",eyebrow:"Interactive walkthrough",
-  title:"From a living cell to a sequenced genome",
-  lede:"Next-generation sequencing turns fragile biological material into billions of short digital reads. In this walkthrough you run every step yourself — at the bench and inside an Illumina sequencer. Nothing advances until <em>you</em> make it happen.",
+  title:"From a living cell to a called variant",
+  lede:"Next-generation sequencing turns fragile biological material into billions of short digital reads — and then software turns those reads into answers. Module 1 puts you at the bench and inside an Illumina sequencer; module 2 sits you at the terminal for the bioinformatics. Nothing advances until <em>you</em> make it happen.",
   autoDone:true,
   build(stage){
     coach("Skim the route, then press <b>Next step</b> to pick up your first pipette.");
-    const steps=[
+    const steps1=[
       ["01","Cell lysis","Break cells open to release genomic DNA."],
       ["02","DNA cleanup","Magnetic beads fish DNA out of the cellular debris."],
       ["03","Fragmentation","Shear long DNA to sequencer-sized pieces."],
@@ -621,20 +659,33 @@ const SCENES=[
       ["08","Sequencing by synthesis","Build the complement one glowing base at a time."],
       ["09","Basecalling & demux","Turn flashes into FASTQ and sort reads by barcode."],
     ];
-    const grid=el("div","mapflow");
-    steps.forEach(([n,t,d])=>{
-      const c=el("div","mapcard");
-      c.append(el("div","n",n),el("div","t",t),el("div","d",d));
-      grid.append(c);
-    });
-    stage.append(grid);
+    const steps2=[
+      ["B1","Read QC & trimming","Cut low-quality tails and adapter read-through."],
+      ["B2","Alignment","Slide each read to its best-scoring home on the reference."],
+      ["B3","Indels & CIGAR","Open a gap when the read doesn't fit — and read the CIGAR."],
+      ["B4","Sort & dedup","Order the pile, purge the PCR clones."],
+      ["B5","Variant calling","Weigh the pileup evidence, emit a VCF."],
+      ["B6","Annotation","Coordinate → gene → codon → consequence."],
+    ];
+    const addGrid=(label,steps)=>{
+      stage.append(el("div","mapmod",label));
+      const grid=el("div","mapflow");
+      steps.forEach(([n,t,d])=>{
+        const c=el("div","mapcard");
+        c.append(el("div","n",n),el("div","t",t),el("div","d",d));
+        grid.append(c);
+      });
+      stage.append(grid);
+    };
+    addGrid("Module 1 · Wet lab & sequencer",steps1);
+    addGrid("Module 2 · Bioinformatics",steps2);
     stage.append(el("p","helper","Everything here is drag-and-drop (or click a reagent, then click its destination). Wrong moves are safe — the bench will tell you why they don't work, which is half the point."));
   }
 },
 
 /* ---------------- 1 · Lysis ---------------- */
 {
-  label:"Cell lysis",grp:"Extraction",eyebrow:"Step 1 · Extraction",
+  label:"Cell lysis",grp:"Extraction",mod:"Module 1 · Wet lab",eyebrow:"Step 1 · Extraction",
   title:"Crack the cells open",
   lede:"Genomic DNA is locked inside cell and nuclear membranes. Lysis buffer — detergent to dissolve the lipid membranes plus proteinase K to digest proteins — sets it free.",
   build(stage){
@@ -1472,14 +1523,14 @@ ${read}
   }
 },
 
-/* ---------------- 10 · Finale ---------------- */
+/* ---------------- 10 · Module 1 checkpoint ---------------- */
 {
-  label:"Run complete",grp:"Finish",eyebrow:"Run summary",
-  title:"You just ran an Illumina workflow",
-  lede:"Every arrow in a sequencing pipeline diagram is something you now did with your own hands — and every reagent had a reason.",
+  label:"Module 1 done",grp:"Checkpoint",dot:"✓",eyebrow:"Checkpoint · Run summary",
+  title:"The wet lab is done — data is born",
+  lede:"Every arrow in a sequencing pipeline diagram is something you now did with your own hands — and every reagent had a reason. But a FASTQ file is raw material, not an answer.",
   autoDone:true,
   build(stage){
-    coach("That's the whole journey: cells → clean DNA → library → clusters → flashes → FASTQ. Press <b>Run it again</b> to start fresh.",true);
+    coach("Cells → clean DNA → library → clusters → flashes → FASTQ. Now trade the pipette for a keyboard: press <b>Next step</b> to boot the bioinformatics module.",true);
     const items=[
       ["Lysis buffer","dissolved membranes and digested protein to <b>free the DNA</b>"],
       ["SPRI beads + magnet","<b>purified</b> DNA away from cellular debris"],
@@ -1496,7 +1547,514 @@ ${read}
       const li=el("li");li.append(el("span","k",k),el("span","v",v));ul.append(li);
     });
     stage.append(ul);
-    stage.append(el("p","helper","Where next, if you're curious: paired-end reads (sequence both ends of each insert), patterned flow cells, index hopping, UMIs for counting molecules, and long-read platforms that skip fragmentation entirely."));
+    stage.append(el("p","helper","Module 2 picks up exactly here: the FASTQ you just generated — including the read you sequenced by hand — goes through QC, alignment, and variant calling next."));
+  }
+},
+
+/* ---------------- 11 · QC & trimming ---------------- */
+{
+  label:"QC & trimming",grp:"Read QC",mod:"Module 2 · Bioinformatics",dot:"B1",
+  eyebrow:"Bioinformatics · Read QC",
+  title:"First, distrust your data",
+  lede:"Fresh FASTQ is never perfect. Base quality decays toward the 3′ end of every read, and when an insert is shorter than the read length the sequencer reads straight through into the adapter. Both get trimmed before alignment — garbage in, variants out.",
+  build(stage){
+    coach("Read 1's quality bars drop off a cliff. Drag the <b>scissors</b> onto the first base where quality falls below Q20 (the first red bar).");
+    const QCOL=q=>q>=30?"#4ADE80":q>=20?"#FBBF24":"#F87171";
+    let trimmed1=false,scanned=false,trimmed2=false;
+
+    // read 1: quality tail
+    const seq1="TGCACGTAAGCT".split("");
+    const q1=[38,37,36,34,33,30,28,25,17,12,9,6];
+    const CUT1=8; // first base with Q<20
+    const t1=el("div","term");
+    t1.append(el("div","tlab","read 1 · per-base quality (Phred)"));
+    const row1=el("div","brow"),qrow1=el("div","qrow");
+    const cells1=[];
+    seq1.forEach((b,i)=>{
+      const c=el("div","bcell",b);row1.append(c);cells1.push(c);
+      const qb=el("div","qb",`<i style="height:${Math.round(q1[i]/40*34)}px;background:${QCOL(q1[i])}"></i>`);
+      qrow1.append(qb);
+      registerZone(c,p=>{
+        if(p==="bwa")return "Not yet — align dirty reads and their errors masquerade as variants. Trim first.";
+        if(p!=="scis")return false;
+        if(trimmed1)return "Read 1 is already trimmed.";
+        if(i<CUT1)return "Q"+q1[i]+" is still good (≥Q20) — cutting here throws away real signal.";
+        if(i>CUT1)return "You'd be keeping bases that are probably wrong — cut earlier, where quality first drops below Q20.";
+        trimmed1=true;
+        for(let k=CUT1;k<seq1.length;k++){cells1[k].classList.add("dimq");cells1[k].style.textDecoration="line-through";qrow1.children[k].firstChild.style.opacity=".25";}
+        toast("Tail trimmed at Q<20. Eight clean bases remain.","good");
+        coach("Read 2 has a different disease: the insert was short, so the machine sequenced into the adapter. Press <b>Scan for adapter</b>.");
+        scanBtn.disabled=false;
+        return true;
+      });
+    });
+    t1.append(row1,qrow1);
+    stage.append(t1);
+
+    // read 2: adapter read-through
+    const insert="GGATTCAC".split(""), adap="AGAT".split("");
+    const seq2=insert.concat(adap); const CUT2=8;
+    const t2=el("div","term");t2.style.marginTop="16px";
+    t2.append(el("div","tlab","read 2 · adapter check"));
+    const row2=el("div","brow");const cells2=[];
+    seq2.forEach((b,i)=>{
+      const c=el("div","bcell",b);row2.append(c);cells2.push(c);
+      registerZone(c,p=>{
+        if(p==="bwa")return "Not yet — an adapter in the read would misalign or soft-clip. Trim first.";
+        if(p!=="scis")return false;
+        if(trimmed2)return "Read 2 is already trimmed.";
+        if(!scanned)return "How do you know where the adapter starts? Run the adapter scan first.";
+        if(i<CUT2)return "That's real insert sequence from the patient — keep it.";
+        if(i>CUT2)return "The adapter starts one step earlier — cut at the first highlighted base.";
+        trimmed2=true;
+        for(let k=CUT2;k<seq2.length;k++){cells2[k].classList.add("dimq");cells2[k].style.textDecoration="line-through";}
+        toast("Adapter clipped. Only patient DNA goes to the aligner.","good");
+        coach("Both reads clean. This is what FastQC + cutadapt/fastp do to billions of reads. On to alignment.",true);
+        markDone();
+        return true;
+      });
+    });
+    t2.append(row2);
+    const scanBtn=el("button","btn","Scan for adapter");scanBtn.disabled=true;scanBtn.style.marginTop="12px";
+    scanBtn.addEventListener("click",()=>{
+      scanned=true;scanBtn.disabled=true;
+      for(let k=CUT2;k<seq2.length;k++)cells2[k].classList.add("adap");
+      coach("Match found: the tail is the start of the Illumina adapter (AGATCGGAAGAGC…). Drag the <b>scissors</b> onto its first base.");
+      toast("cutadapt: matched AGAT… at position 9.","good");
+    });
+    t2.append(scanBtn);
+    stage.append(t2);
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Toolbox"));
+    shelf.append(
+      makeChip({label:"Trim",sub:"quality / adapter scissors",glyph:GL.scis(),payload:"scis"}),
+      makeChip({label:"Aligner",sub:"BWA-MEM — tempting, but wait",glyph:GL.enzyme("var(--sky)"),payload:"bwa"}),
+    );
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 12 · Alignment ---------------- */
+{
+  label:"Alignment",grp:"Alignment",dot:"B2",
+  eyebrow:"Bioinformatics · Alignment",
+  title:"Find where the read belongs",
+  lede:"The human reference is 3 billion letters and every read must find its home. Aligners score each candidate position — +1 for a match, −1 for a mismatch — and keep the best. Here you do it by hand: <b>slide the read</b> along the reference and watch the score.",
+  build(stage){
+    const read=((RUN.read&&RUN.read.length===8)?RUN.read:"ACGTGCAT").split("");
+    const L=20,TARGET=9,PITCH=29;
+    // build a reference with the true site at TARGET and a near-miss decoy
+    const AB=["A","C","G","T"];
+    const ref=[];for(let i=0;i<L;i++)ref.push(AB[(i*7+3)%4]);
+    const dec=read.slice();dec[2]=COMP[dec[2]];dec[5]=COMP[dec[5]];
+    for(let i=0;i<8;i++)ref[1+i]=dec[i];
+    for(let i=0;i<8;i++)ref[TARGET+i]=read[i];
+    const scoreAt=o=>{let s=0;for(let i=0;i<8;i++)s+=ref[o+i]===read[i]?1:-1;return s;};
+    for(let pass=0;pass<3;pass++){
+      for(let o=0;o<=L-8;o++){
+        if(o===TARGET)continue;
+        if(scoreAt(o)>=5){
+          for(let i=0;i<8;i++){const idx=o+i;
+            if((idx<TARGET||idx>TARGET+7)&&ref[idx]===read[i]){ref[idx]=COMP[ref[idx]];break;}}
+        }
+      }
+    }
+    coach("Drag the glowing read strip left and right (or use the arrows). Find the position that scores <b>+8</b>, then lock it in.");
+    const t=el("div","term");
+    t.append(el("div","tlab","reference (illustrative window) · read from your run"));
+    const box=el("div","alnbox");
+    const refrow=el("div","brow");
+    ref.forEach(b=>refrow.append(el("div","bcell refm",b)));
+    box.append(refrow);
+    const strip=el("div","readstrip");
+    strip.style.top="34px";
+    const rcells=[];
+    read.forEach(b=>{const c=el("div","bcell",b);strip.append(c);rcells.push(c);});
+    box.append(strip);
+    t.append(box);
+    let offset=0;
+    const ctrl=el("div");ctrl.style.cssText="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px";
+    const leftB=el("button","btn","◀"),rightB=el("button","btn","▶");
+    const score=el("span","countchip","");
+    const lockB=el("button","btn primary","Lock in alignment");
+    ctrl.append(leftB,rightB,score,lockB);
+    t.append(ctrl);
+    stage.append(t);
+    stage.append(el("p","helper","Real aligners don't slide: they index the reference (BWA's FM-index, minimap2's minimizers) so short exact “seeds” jump straight to candidate spots, and only those get scored like this."));
+
+    function render(){
+      strip.style.left=(offset*PITCH)+"px";
+      let m=0;
+      read.forEach((b,i)=>{
+        const ok=ref[offset+i]===b;if(ok)m++;
+        rcells[i].classList.toggle("match",ok);
+        rcells[i].classList.toggle("mis",!ok);
+      });
+      const s=2*m-8;
+      score.textContent=`pos ${offset}: ${m} match · ${8-m} mismatch → score ${s>=0?"+":""}${s}`;
+    }
+    render();
+    const move=d=>{offset=Math.max(0,Math.min(L-8,offset+d));render();};
+    leftB.addEventListener("click",()=>move(-1));
+    rightB.addEventListener("click",()=>move(1));
+    let dragS=null;
+    strip.addEventListener("pointerdown",e=>{
+      dragS={x:e.clientX,o:offset,id:e.pointerId};
+      strip.setPointerCapture(e.pointerId);strip.classList.add("sliding");
+    });
+    strip.addEventListener("pointermove",e=>{
+      if(!dragS||e.pointerId!==dragS.id)return;
+      offset=Math.max(0,Math.min(L-8,dragS.o+Math.round((e.clientX-dragS.x)/PITCH)));
+      render();
+    });
+    const endD=e=>{if(dragS&&e.pointerId===dragS.id){dragS=null;strip.classList.remove("sliding");}};
+    strip.addEventListener("pointerup",endD);strip.addEventListener("pointercancel",endD);
+    lockB.addEventListener("click",()=>{
+      if(doneFlags[current])return;
+      const s=scoreAt(offset);
+      if(offset===TARGET){
+        coach("Perfect alignment, +8. Notice position 1 scored +4 — a paralog-like near-miss. Mapping quality encodes exactly that gap between best and second-best.",true);
+        toast("MAPQ high: best hit is far better than the runner-up.","good");
+        markDone();
+      }else{
+        toast(`Score here is ${s>=0?"+":""}${s} — a better-scoring position exists (+8 is possible). Keep sliding.`,"bad");
+      }
+    });
+  }
+},
+
+/* ---------------- 13 · Indels & CIGAR ---------------- */
+{
+  label:"Indels & CIGAR",grp:"Alignment",dot:"B3",
+  eyebrow:"Bioinformatics · Alignment",
+  title:"When the read doesn't fit, open a gap",
+  lede:"This read from Patient B starts perfectly, then everything mismatches. No sliding will fix it: the patient's DNA is missing two bases the reference has — a <b>deletion</b>. Aligners handle this by opening a gap, and record it in the CIGAR string.",
+  build(stage){
+    const ref="CTGGATCATCACAG".split("");
+    const read="GGATTCAC".split("");
+    const OFF=2,SLOT=4,PITCH=29;
+    let solved=false;
+    coach("The first four bases match, then it falls apart. Drag the <b>2-base gap</b> tile into the junction where the deletion belongs (between two read bases).");
+    const t=el("div","term");
+    t.append(el("div","tlab","reference · read GGATTCAC (patient B) at fixed position"));
+    const refrow=el("div","brow");
+    ref.forEach(b=>refrow.append(el("div","bcell refm",b)));
+    t.append(refrow);
+    const readrow=el("div","brow");readrow.style.marginTop="8px";readrow.style.marginLeft=(OFF*PITCH)+"px";
+    t.append(readrow);
+    const cigar=el("div","countchip","CIGAR: 8M · score +2");cigar.style.marginTop="14px";
+    t.append(el("div","",""),cigar);
+    stage.append(t);
+    stage.append(el("p","helper","CIGAR grammar: M = aligned (match or mismatch!), I = insertion in the read, D = deletion from the read, S = soft-clipped. 4M2D4M reads: 4 aligned, skip 2 reference bases, 4 aligned."));
+
+    function build(gapAt){
+      readrow.innerHTML="";
+      readrow.style.position="relative";
+      let refI=OFF;
+      read.forEach((b,i)=>{
+        if(i===gapAt){
+          for(let g=0;g<2;g++){readrow.append(el("div","bcell gapc","–"));refI++;}
+        }
+        const c=el("div","bcell",b);
+        const ok=ref[refI]===b;
+        c.classList.add(ok?"match":"mis");
+        readrow.append(c);refI++;
+      });
+      if(!solved){
+        // junction overlays between read bases: drop the gap tile on one
+        for(let i=1;i<read.length;i++){
+          const slot=el("div","gapslot");
+          slot.style.left=(i*PITCH-8)+"px";
+          readrow.append(slot);
+          registerZone(slot,p=>{
+            if(p!=="gap2")return false;
+            if(i!==SLOT)return "A gap there doesn't rescue it — look where the mismatches start. Everything before the deletion should stay green.";
+            solved=true;
+            zones.length=0;
+            build(SLOT);
+            cigar.textContent="CIGAR: 4M2D4M · score +8 − gap penalty";
+            coach("Aligned. The read skips the two reference bases the patient doesn't have — that's a 2 bp deletion, and it might matter more than any SNV.",true);
+            toast("Gapped alignment found: 4M2D4M.","good");
+            markDone();
+            return true;
+          });
+        }
+      }
+    }
+    build(-1);
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Alignment moves"));
+    shelf.append(makeChip({label:"2-base gap",sub:"deletion — skips reference bases",glyph:`<span style="display:flex;gap:2px">${'<span style="width:9px;height:20px;border-radius:3px;background:rgba(53,211,194,.25);border:1px solid var(--teal);display:block"></span>'.repeat(2)}</span>`,payload:"gap2"}));
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 14 · Sort & dedup ---------------- */
+{
+  label:"Sort & dedup",grp:"Alignment",dot:"B4",
+  eyebrow:"Bioinformatics · Cleanup",
+  title:"Order the pile, purge the clones",
+  lede:"Aligned reads land in file order — useless for lookups, so they're sorted by coordinate. Then comes a subtler cleanup: the PCR steps back in module 1 copied some library molecules, and those copies look like independent evidence when they're not.",
+  build(stage){
+    const ref="ACGGTTACGATCCAGT".split("");
+    const PITCH=29,ROWH=36;
+    const reads=[
+      {off:0,q:33,dup:false},
+      {off:3,q:31,dup:false},
+      {off:5,q:35,dup:false,best:true},
+      {off:5,q:22,dup:true},
+      {off:5,q:18,dup:true},
+      {off:8,q:30,dup:false},
+    ];
+    let sorted=false,flags=0;
+    coach("This BAM is in file order. Click <b>samtools sort</b> to order the reads by position.");
+    const t=el("div","term");
+    t.append(el("div","tlab","reference · aligned reads (BAM)"));
+    const refrow=el("div","brow");
+    ref.forEach(b=>refrow.append(el("div","bcell refm",b)));
+    t.append(refrow);
+    const pile=el("div","pilewrap");pile.style.height=(reads.length*ROWH+6)+"px";pile.style.marginTop="10px";
+    const shuffle=[3,0,5,2,4,1]; // initial visual order (file order)
+    reads.forEach((r,i)=>{
+      const row=el("div","pilerow");
+      row.style.left=(r.off*PITCH)+"px";
+      row.style.top=(shuffle.indexOf(i)*ROWH)+"px";
+      for(let k=0;k<8;k++)row.append(el("div","bcell",ref[r.off+k]));
+      row.append(el("span","rowlab","Q"+r.q));
+      pile.append(row);r.el=row;
+      registerZone(row,p=>{
+        if(p!=="dupflag")return false;
+        if(!sorted)return "Sort first — duplicates only become obvious when reads with the same start sit next to each other.";
+        if(r.best)return "These three are copies of one molecule — but keep the best-quality copy (Q35) and flag the others.";
+        if(!r.dup)return "Different start coordinate → a different original molecule. That's independent evidence; it stays.";
+        if(row.classList.contains("dup"))return "Already flagged.";
+        row.classList.add("dup");row.append(el("span","duptag","DUP"));
+        flags++;
+        if(flags===2){
+          coach("Six reads, four independent molecules. The two clones are flagged and will be ignored at variant calling — otherwise one PCR-happy molecule could fake a variant.",true);
+          toast("MarkDuplicates: 2 of 6 reads flagged (33%).","good");
+          markDone();
+        }else{
+          toast("Flagged. One more clone is hiding in that stack.","good");
+        }
+        return true;
+      });
+    });
+    t.append(pile);
+    const sortBtn=el("button","btn","samtools sort");sortBtn.style.marginTop="4px";
+    sortBtn.addEventListener("click",()=>{
+      if(sorted)return;
+      sorted=true;sortBtn.disabled=true;
+      reads.forEach((r,i)=>{r.el.style.top=(i*ROWH)+"px";});
+      coach("Sorted by coordinate. Now look at the three reads starting at position 5: same start, same end, same sequence. Drag the <b>duplicate flag</b> onto the two worse-quality copies.");
+      toast("Sorted. Identical start positions now stack together.","good");
+    });
+    t.append(sortBtn);
+    stage.append(t);
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Toolbox"));
+    shelf.append(makeChip({label:"Duplicate flag",sub:"MarkDuplicates",glyph:GL.flag("var(--G)"),payload:"dupflag"}));
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 15 · Variant calling ---------------- */
+{
+  label:"Variant calling",grp:"Variants",dot:"B5",
+  eyebrow:"Bioinformatics · Variants",
+  title:"Read the pile, call the variant",
+  lede:"At every reference position the caller weighs the evidence: how many reads disagree, how good their base qualities are, whether both strands agree. Two columns in this pileup look suspicious — only one is a real variant.",
+  build(stage){
+    const ref="GATCACGTAGCTTGCA".split("");
+    const PITCH=29,ROWH=33,VAR=6,ERR=12;
+    const reads=[
+      {off:0,seq:"GATCACATAG"},
+      {off:2,seq:"TCACGTAGCT"},
+      {off:4,seq:"ACATAGCTTG"},
+      {off:5,seq:"CGTAGCTTGC"},
+      {off:6,seq:"ATAGCTTGCA"},
+      {off:3,seq:"CACGTAGCTC",lowq:true},
+    ];
+    let called=false;
+    coach("Scan the columns. Drag the <b>variant flag</b> onto the position where the evidence says the patient truly differs from the reference.");
+    const t=el("div","term");
+    t.append(el("div","tlab","deduplicated pileup · one sample"));
+    const inner=el("div");inner.style.position="relative";inner.style.width="max-content";
+    const refrow=el("div","brow");
+    ref.forEach(b=>refrow.append(el("div","bcell refm",b)));
+    inner.append(refrow);
+    const pile=el("div","pilewrap");pile.style.height=(reads.length*ROWH)+"px";pile.style.marginTop="10px";
+    reads.forEach((r,i)=>{
+      const row=el("div","pilerow");
+      row.style.left=(r.off*PITCH)+"px";row.style.top=(i*ROWH)+"px";
+      r.seq.split("").forEach((b,k)=>{
+        const col=r.off+k;
+        const c=el("div","bcell",b);
+        if(b!==ref[col])c.classList.add("mis");
+        if(r.lowq)c.classList.add("dimq");
+        row.append(c);
+      });
+      if(r.lowq)row.append(el("span","rowlab","Q9 ⚠"));
+      pile.append(row);
+    });
+    inner.append(pile);
+    // column drop zones over ref + pile
+    const totH=32+10+reads.length*ROWH;
+    for(let c=0;c<ref.length;c++){
+      const z=el("div","colzone");
+      z.style.left=(c*PITCH)+"px";z.style.top="0";z.style.height=totH+"px";
+      inner.append(z);
+      registerZone(z,p=>{
+        if(p!=="varflag")return false;
+        if(called)return "The variant is already called.";
+        if(c===ERR)return "One mismatching read out of four — and it's the low-quality one (Q9). That's a sequencing error, not a variant.";
+        if(c!==VAR)return "Every read agrees with the reference here. Nothing to call.";
+        called=true;
+        vcf.style.display="";gtRow.style.display="flex";
+        coach("Three of six good reads say A where the reference says G — allele fraction 0.5. One question left: what's the genotype?");
+        toast("Candidate variant at this column accepted: G→A, AF=0.50.","good");
+        return true;
+      });
+    }
+    t.append(inner);
+    stage.append(t);
+
+    const vcf=el("div","fastq");vcf.style.display="none";vcf.style.marginTop="16px";
+    vcf.innerHTML=`<span class="h">##fileformat=VCFv4.3   (coordinates illustrative)</span>
+<span class="h">#CHROM  POS       ID  REF ALT QUAL FILTER INFO         FORMAT GT:AD</span>
+chr17   43091652  .   G   A   58   PASS   DP=6;AF=0.50  GT:AD  <span class="q">?/?</span>:3,3`;
+    stage.append(vcf);
+    const gtRow=el("div");gtRow.style.cssText="display:none;gap:12px;margin-top:14px;align-items:center;flex-wrap:wrap";
+    gtRow.append(el("span","","Half the reads carry the variant. Genotype?"));
+    const het=el("button","btn","0/1 · heterozygous"),hom=el("button","btn","1/1 · homozygous");
+    gtRow.append(het,hom);
+    stage.append(gtRow);
+    het.addEventListener("click",()=>{
+      if(doneFlags[current])return;
+      vcf.innerHTML=vcf.innerHTML.replace("?/?","0/1");
+      het.classList.add("primary");hom.disabled=true;
+      coach("Heterozygous — one chromosome carries G, the other A, so ~half the reads show each. There's your VCF record. One step left: what does it <i>mean</i>?",true);
+      toast("GT=0/1. Variant called.","good");
+      markDone();
+    });
+    hom.addEventListener("click",()=>{
+      toast("If both copies carried the variant, nearly every read would show A — not half of them.","bad");
+    });
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Toolbox"));
+    shelf.append(makeChip({label:"Variant flag",sub:"candidate site",glyph:GL.flag("var(--T)"),payload:"varflag"}));
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 16 · Annotation ---------------- */
+{
+  label:"Annotation",grp:"Variants",dot:"B6",
+  eyebrow:"Bioinformatics · Interpretation",
+  title:"From coordinate to consequence",
+  lede:"A VCF row is just a coordinate and two letters. Annotation places it in the genome you enriched for back in module 1: this position sits in a <b>BRCA1</b> codon. Apply the variant and work out what it does to the protein.",
+  build(stage){
+    let applied=false;
+    coach("The variant column sits in the middle of the highlighted codon. Drag the <b>alt allele</b> into the empty slot to see the mutated codon.");
+    const t=el("div","term");
+    t.append(el("div","tlab","gene context · BRCA1 (illustrative coordinates) · codon view"));
+    const wrap=el("div");wrap.style.cssText="display:flex;gap:26px;align-items:center;flex-wrap:wrap";
+    const mkCodon=(bases,label)=>{
+      const box=el("div");
+      const row=el("div","brow");
+      const cells=bases.map(b=>{const c=el("div","bcell",b===null?"·":b);if(b===null)c.style.borderStyle="dashed";row.append(c);return c;});
+      box.append(row,el("div","rowlab",label));box.lastChild.style.margin="6px 0 0";
+      return {box,cells};
+    };
+    const refC=mkCodon(["C","G","T"],"reference codon → Arg (R)");
+    refC.cells[1].classList.add("mis");
+    const arrow=el("div","","→");arrow.style.cssText="font-size:22px;color:#71829C";
+    const altC=mkCodon(["C",null,"T"],"patient codon → ?");
+    wrap.append(refC.box,arrow,altC.box);
+    t.append(wrap);
+    stage.append(t);
+
+    const report=el("div","report");report.style.marginTop="18px";
+    const rows={};
+    [["gene","BRCA1"],["variant","chr17:43091652 G>A"],["hgvs","c.5096G>A (illustrative)"],["protein","—"],["consequence",null],["next step","—"]].forEach(([k,v])=>{
+      const rr=el("div","rrow");
+      rr.append(el("span","rk",k));
+      let rv;
+      if(k==="consequence")rv=el("span","slotbox","drop the consequence here");
+      else rv=el("span","rv"+(v==="—"?" pend":""),v);
+      rr.append(rv);rows[k]=rv;report.append(rr);
+    });
+    const consSlot=rows["consequence"];
+    stage.append(report);
+
+    registerZone(altC.cells[1],p=>{
+      if(p==="alt"){
+        if(applied)return "Already applied.";
+        applied=true;
+        altC.cells[1].textContent="A";altC.cells[1].classList.add("mis");altC.cells[1].style.borderStyle="solid";
+        altC.box.querySelector(".rowlab").textContent="patient codon CAT → His (H)";
+        rows["protein"].textContent="p.(Arg→His) at this codon";rows["protein"].classList.remove("pend");
+        coach("CGT (arginine) became CAT (histidine) — a different amino acid. Now classify it: drag the right <b>consequence</b> card onto the report.");
+        toast("Codon updated: CGT → CAT.","good");
+        return true;
+      }
+      if(p==="ref")return "That's the reference allele — dropping it in changes nothing.";
+      return false;
+    });
+    registerZone(consSlot,p=>{
+      if(!p.startsWith("cons:"))return p==="alt"?"The allele goes into the codon above.":false;
+      if(!applied)return "Apply the variant to the codon first — you can't classify what you haven't seen.";
+      const kind=p.split(":")[1];
+      if(kind==="syn")return "Arg → His is a change of amino acid. Synonymous means the protein stays identical.";
+      if(kind==="non")return "CAT codes for histidine, not a stop codon — the protein keeps going.";
+      consSlot.textContent="Missense";consSlot.className="rv";
+      rows["next step"].textContent="flag for clinical review (ClinVar, ACMG criteria)";rows["next step"].classList.remove("pend");
+      coach("Missense, in the gene your capture panel was designed around. From here it's classification against databases and, eventually, a clinical report — which is a story of evidence, not just software.",true);
+      toast("Annotation complete: BRCA1 missense variant.","good");
+      markDone();
+      return true;
+    });
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Alleles & consequence cards"));
+    shelf.append(
+      makeChip({label:"A",sub:"alt allele",glyph:GL.chipbase("var(--T)","A"),payload:"alt"}),
+      makeChip({label:"G",sub:"ref allele",glyph:GL.chipbase("#5A6E8C","G"),payload:"ref"}),
+      makeChip({label:"Synonymous",sub:"same amino acid",glyph:GL.enzyme("#8494A9"),payload:"cons:syn"}),
+      makeChip({label:"Missense",sub:"different amino acid",glyph:GL.enzyme("var(--G)"),payload:"cons:mis"}),
+      makeChip({label:"Nonsense",sub:"premature stop",glyph:GL.enzyme("var(--T)"),payload:"cons:non"}),
+    );
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 17 · Grand finale ---------------- */
+{
+  label:"Pipeline complete",grp:"Finish",dot:"✓",eyebrow:"Run summary",
+  title:"Sample to variant, end to end",
+  lede:"You lysed the cells, built and enriched the library, ran the sequencer — and then QC'd, aligned, deduplicated, called and annotated the result. That's the whole modern sequencing pipeline, wet and dry.",
+  autoDone:true,
+  build(stage){
+    coach("Both modules complete. Press <b>Run it again</b> to start from the first pipette.",true);
+    const items=[
+      ["Module 1","cells → clean DNA → sized, barcoded, enriched library → clusters → <b>FASTQ</b>"],
+      ["QC & trimming","cut the low-quality tail and the adapter read-through"],
+      ["Alignment","slid each read to its best-scoring home (+1/−1), like a seed-and-extend aligner"],
+      ["CIGAR","opened a 2 bp gap: <b>4M2D4M</b> — a deletion, recorded honestly"],
+      ["Sort & dedup","coordinate-sorted the BAM and flagged the PCR clones"],
+      ["Variant calling","3 of 6 clean reads → G>A, AF 0.5, genotype <b>0/1</b>"],
+      ["Annotation","BRCA1 codon CGT→CAT: <b>missense</b>, flagged for clinical review"],
+    ];
+    const ul=el("ul","recap");
+    items.forEach(([k,v])=>{
+      const li=el("li");li.append(el("span","k",k),el("span","v",v));ul.append(li);
+    });
+    stage.append(ul);
+    stage.append(el("p","helper","Where next, if you're curious: paired-end reads, base-quality recalibration (BQSR), joint calling across samples, structural variants, UMIs, RNA-seq, and long-read platforms that skip fragmentation entirely."));
   }
 },
 ];

@@ -1,8 +1,10 @@
 # Base by Base — an interactive NGS tutorial
 
 A hands-on, drag-and-drop walkthrough of an Illumina next-generation sequencing
-workflow, from a living cell to demultiplexed FASTQ reads. Built as a single
-self-contained HTML file — no build step, no dependencies, no server required.
+workflow in two modules: the wet lab (from a living cell to demultiplexed FASTQ
+reads) and the bioinformatics (from FASTQ to an annotated variant). Built as a
+single self-contained HTML file — no build step, no dependencies, no server
+required.
 
 ## Run it
 
@@ -30,9 +32,22 @@ reagent, then click its destination), and wrong moves get an explanation of
 | 8 | Sequencing by synthesis | You are the polymerase: drag the complementary fluorescent nucleotide each cycle |
 | 9 | Basecalling & demux | Call bases from the camera strip, then sort pooled reads back to their patients |
 
+**Module 2 — Bioinformatics** (rendered as dark "terminal" screens):
+
+| # | Step | Interaction |
+|---|------|-------------|
+| B1 | Read QC & trimming | Cut the low-quality tail where Phred drops below Q20; scan for and clip adapter read-through |
+| B2 | Alignment | Slide the read you sequenced along the reference, watch the ±1 score, beat the decoy near-match |
+| B3 | Indels & CIGAR | Drag a 2-base gap into the right junction; watch the CIGAR go 8M → 4M2D4M |
+| B4 | Sort & dedup | `samtools sort` the pile, then flag the PCR duplicates (keeping the best-quality copy) |
+| B5 | Variant calling | Flag the true heterozygous SNV column, reject the low-quality error column, call the genotype |
+| B6 | Annotation | Apply the alt allele to a BRCA1 codon, derive Arg→His, classify it as missense |
+
 State (which barcode each patient got, the read you sequenced) carries through
-the scenes, so the run tells one continuous story. Progress is saved in
-`localStorage`.
+the scenes and across the modules, so the run tells one continuous story — the
+read you build in sequencing-by-synthesis is the read you later align. Progress
+is saved in `localStorage`. Genomic coordinates in module 2 are illustrative,
+not clinical assertions.
 
 ## Tech notes
 
