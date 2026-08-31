@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base by Base</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* ================= Base by Base — an interactive Illumina NGS walkthrough =================
+   Single committed dark theme: the whole page lives in the sequencer's imaging chamber,
+   so fluorescent chemistry reads as light against the dark. All colors painted explicitly. */
+:root{
+  --ink:#0A101E;          /* page ground */
+  --panel:#111A2B;        /* cards, stage */
+  --panel-2:#16223A;      /* raised elements */
+  --line:#243450;         /* hairlines */
+  --line-soft:#1B2840;
+  --text:#E8EEF9;
+  --muted:#93A1B8;
+  --faint:#5C6B84;
+  --teal:#35D3C2;         /* accent: flow-cell glass */
+  --teal-deep:#0F7C72;
+  --teal-ink:#062C29;
+  --A:#4ADE80; --C:#60A5FA; --G:#FBBF24; --T:#F87171;
+  --idx1:#7C8CF8;         /* index / barcode 1 (indigo) */
+  --idx2:#F49E4C;         /* index / barcode 2 (amber) */
+  --rose:#FB7185; --violet:#A78BFA; --sky:#38BDF8;  /* capture targets */
+  --good:#4ADE80; --bad:#F87171;
+  --bead:#C9895A;         /* SPRI bead brown */
+  --shadow:0 10px 30px rgba(2,6,16,.55);
+  --r:14px;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --disp:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:15.5px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:6px}
+
+/* ---------- shell ---------- */
+#app{display:flex;min-height:100vh}
+#rail{
+  width:236px;flex:0 0 236px;background:linear-gradient(180deg,#0C1322,#0A101E 55%);
+  border-right:1px solid var(--line-soft);padding:22px 16px 24px;
+  display:flex;flex-direction:column;gap:20px;position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+#brand{padding:0 6px}
+#brand .word{
+  font-family:var(--disp);font-weight:800;font-size:21px;letter-spacing:.2px;line-height:1.1;
+}
+#brand .word b{color:var(--teal);font-weight:800}
+#brand .sub{
+  margin-top:5px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+}
+#steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#steps .grp{
+  margin:14px 6px 4px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+}
+#steps li.step button{
+  width:100%;text-align:left;background:none;border:none;border-radius:10px;cursor:pointer;
+  padding:8px 10px;display:flex;align-items:center;gap:10px;color:var(--muted);
+}
+#steps li.step button:hover{background:rgba(255,255,255,.04)}
+#steps li.step button[disabled]{cursor:default;opacity:.45}
+#steps .dot{
+  width:22px;height:22px;flex:0 0 22px;border-radius:50%;border:1.5px solid var(--line);
+  display:grid;place-items:center;font-family:var(--mono);font-size:10.5px;color:var(--faint);
+  transition:all .25s;
+}
+#steps li.on button{color:var(--text);background:rgba(53,211,194,.08)}
+#steps li.on .dot{border-color:var(--teal);color:var(--teal);box-shadow:0 0 10px rgba(53,211,194,.35)}
+#steps li.done .dot{background:var(--teal-deep);border-color:var(--teal-deep);color:#DFFCF8}
+#steps li.done button{color:var(--muted)}
+#railfoot{margin-top:auto;padding:0 6px;font-size:11.5px;color:var(--faint);line-height:1.5}
+#railfoot a{color:var(--muted)}
+
+#main{flex:1;min-width:0;display:flex;flex-direction:column}
+#scenewrap{max-width:1060px;width:100%;margin:0 auto;padding:34px 34px 90px;flex:1}
+
+#scenehead .eyebrow{
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);
+  font-weight:600;margin-bottom:8px;
+}
+#scenehead h1{
+  font-family:var(--disp);font-weight:800;font-size:clamp(26px,3.4vw,38px);
+  margin:0 0 10px;line-height:1.08;text-wrap:balance;letter-spacing:-.01em;
+}
+#scenehead .lede{max-width:62ch;color:var(--muted);margin:0 0 18px}
+
+#coach{
+  display:flex;align-items:flex-start;gap:10px;
+  background:linear-gradient(90deg,rgba(53,211,194,.10),rgba(53,211,194,.02));
+  border:1px solid rgba(53,211,194,.28);border-radius:12px;
+  padding:11px 14px;margin:0 0 20px;color:#C8F5EF;font-size:14.5px;
+}
+#coach .pin{
+  flex:0 0 auto;margin-top:2px;width:8px;height:8px;border-radius:50%;
+  background:var(--teal);box-shadow:0 0 8px var(--teal);
+}
+#coach.win{border-color:rgba(74,222,128,.4);background:linear-gradient(90deg,rgba(74,222,128,.12),rgba(74,222,128,.02));color:#D8F7E3}
+#coach.win .pin{background:var(--good);box-shadow:0 0 8px var(--good)}
+
+#stage{
+  background:radial-gradient(1200px 500px at 30% -10%,rgba(53,211,194,.05),transparent 60%),var(--panel);
+  border:1px solid var(--line-soft);border-radius:18px;box-shadow:var(--shadow);
+  padding:26px;min-height:380px;position:relative;
+}
+
+#nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px}
+.btn{
+  border:1px solid var(--line);background:var(--panel-2);border-radius:11px;
+  padding:10px 18px;cursor:pointer;font-weight:600;font-size:14.5px;transition:all .15s;
+}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.btn[disabled]:hover{border-color:var(--line);color:inherit}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#04211E}
+.btn.primary:hover{filter:brightness(1.08);color:#04211E}
+.btn.primary[disabled]{filter:none}
+.btn.big{padding:13px 26px;font-size:16px}
+
+/* ---------- shelf & chips (drag sources) ---------- */
+.shelf{
+  margin-top:22px;border-top:1px dashed var(--line);padding-top:16px;
+  display:flex;flex-wrap:wrap;gap:12px;align-items:stretch;
+}
+.shelf-label{
+  flex-basis:100%;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+  margin-bottom:-2px;
+}
+.chip{
+  display:flex;align-items:center;gap:10px;border:1px solid var(--line);
+  background:var(--panel-2);border-radius:12px;padding:9px 14px 9px 10px;cursor:grab;
+  user-select:none;-webkit-user-select:none;touch-action:none;transition:transform .12s,border-color .12s,opacity .3s;
+  font-size:14px;font-weight:500;text-align:left;
+}
+.chip:hover{border-color:var(--teal);transform:translateY(-1px)}
+.chip .glyph{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center}
+.chip small{display:block;color:var(--faint);font-size:11.5px;font-weight:400;line-height:1.3}
+.chip.picked{border-color:var(--teal);box-shadow:0 0 0 2px rgba(53,211,194,.35)}
+.chip.spent{opacity:.28;pointer-events:none;filter:saturate(.3)}
+.chip.dragging{opacity:.35}
+.ghost{
+  position:fixed;z-index:99;pointer-events:none;margin:0;
+  transform:translate(-50%,-60%) rotate(-2deg) scale(1.04);opacity:.95;
+  box-shadow:0 14px 34px rgba(0,0,0,.55);cursor:grabbing;
+}
+
+/* ---------- drop zones ---------- */
+.zone{position:relative;transition:box-shadow .15s}
+.zone.hot{box-shadow:0 0 0 2.5px var(--teal),0 0 22px rgba(53,211,194,.35);border-radius:14px}
+.zone.deny{animation:shake .4s}
+@keyframes shake{
+  10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(3px)}
+  30%,70%{transform:translateX(-5px)}40%,60%{transform:translateX(5px)}50%{transform:translateX(-4px)}
+}
+
+/* ---------- toast ---------- */
+#toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);z-index:120;
+  background:#0E1728;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
+  padding:11px 18px;max-width:520px;font-size:14px;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.bad{border-color:rgba(248,113,113,.5);color:#FFD9D9}
+#toast.good{border-color:rgba(74,222,128,.5);color:#DBF9E6}
+
+/* ---------- lab widgets ---------- */
+.bench{display:flex;gap:34px;align-items:flex-start;justify-content:center;flex-wrap:wrap;padding-top:6px}
+.tube-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.tube-name{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.tube{
+  width:104px;height:172px;position:relative;
+  border:2.5px solid rgba(210,228,255,.28);border-top:none;border-radius:8px 8px 50px 50px;
+  background:linear-gradient(105deg,rgba(255,255,255,.05),rgba(255,255,255,0) 45%);
+}
+.tube::before{ /* rim */
+  content:"";position:absolute;left:-8px;right:-8px;top:-3px;height:9px;
+  border:2.5px solid rgba(210,228,255,.28);border-radius:5px;background:rgba(210,228,255,.06);
+}
+.tube .liquid{
+  position:absolute;left:3px;right:3px;bottom:3px;height:58%;overflow:hidden;
+  border-radius:4px 4px 44px 44px;background:linear-gradient(180deg,rgba(53,211,194,.14),rgba(53,211,194,.30));
+  transition:background .6s,height .6s;
+}
+.cell{
+  position:absolute;width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 35% 32%,#9FD8CE,#3E8F84 70%);
+  box-shadow:inset 0 0 6px rgba(0,0,0,.35);transition:transform .5s,opacity .5s;
+}
+.cell::after{ /* nucleus */
+  content:"";position:absolute;left:32%;top:30%;width:11px;height:11px;border-radius:50%;
+  background:#1E4E47;
+}
+.cell.pop{transform:scale(1.9);opacity:0}
+.squig{position:absolute;opacity:0;transition:opacity .8s}
+.squig.showq{opacity:1}
+.grit{position:absolute;width:5px;height:5px;border-radius:2px;background:#7A8699;opacity:.85;transition:opacity .7s}
+.beadDot{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--bead);box-shadow:0 0 4px rgba(201,137,90,.6);transition:all .8s cubic-bezier(.5,0,.3,1)}
+.magnet{
+  width:46px;height:96px;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;
+  border:2px solid #2A3A55;box-shadow:var(--shadow);
+}
+.magnet .n{flex:1;background:#C2453F;display:grid;place-items:center;font-family:var(--mono);font-weight:600;color:#FFE3E1}
+.magnet .s{flex:1;background:#3D66C4;display:grid;place-items:center;font-family:var(--mono);font-weight:600;color:#DDE7FF}
+.readout{
+  font-family:var(--mono);font-size:13px;background:#0B1322;border:1px solid var(--line-soft);
+  border-radius:10px;padding:12px 16px;color:#9FE8DF;line-height:1.7;
+}
+.readout b{color:var(--teal);font-weight:600}
+
+/* fragments */
+.fragtray{display:flex;flex-direction:column;gap:18px;padding:8px 6px;min-width:300px}
+.frag{position:relative;height:22px;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.strand{height:5px;border-radius:3px;background:linear-gradient(90deg,#5FA8E8,#8AC6F5);position:relative;transition:all .5s}
+.strand.bot{background:linear-gradient(90deg,#4E82C9,#6FA5DE)}
+.frag .aTag{
+  position:absolute;top:50%;transform:translateY(-50%);font-family:var(--mono);font-weight:600;font-size:11px;
+  color:#0B2B18;background:var(--A);border-radius:4px;padding:0 3px;opacity:0;transition:opacity .5s;
+}
+.frag .aTag.l{left:-16px}.frag .aTag.r{right:-16px}
+.frag .aTag.showq{opacity:1}
+.adTag{
+  position:absolute;top:50%;transform:translateY(-50%);width:26px;height:16px;border-radius:4px;opacity:0;transition:opacity .5s;
+}
+.adTag.showq{opacity:1}
+
+/* sonicator */
+.machine{
+  background:linear-gradient(180deg,#18233B,#10192C);border:1px solid var(--line);border-radius:16px;
+  padding:18px 22px;display:flex;flex-direction:column;gap:14px;align-items:center;min-width:250px;
+}
+.machine .title{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--faint);text-transform:uppercase}
+.machine .slot{
+  width:120px;height:120px;border:2px dashed var(--line);border-radius:14px;display:grid;place-items:center;
+  color:var(--faint);font-size:12px;text-align:center;padding:8px;background:rgba(0,0,0,.25);
+}
+.machine .slot.loaded{border-style:solid;border-color:var(--teal-deep)}
+.machine.buzz{animation:buzz .5s linear}
+@keyframes buzz{0%,100%{transform:translate(0)}20%{transform:translate(-2px,1px)}40%{transform:translate(2px,-1px)}60%{transform:translate(-2px,-1px)}80%{transform:translate(2px,1px)}}
+.meter{width:340px;max-width:100%}
+.meter .track{position:relative;height:14px;border-radius:8px;background:#0B1322;border:1px solid var(--line-soft)}
+.meter .win{position:absolute;top:0;bottom:0;background:rgba(74,222,128,.18);border-inline:1px solid rgba(74,222,128,.6)}
+.meter .needle{position:absolute;top:-5px;width:3px;height:24px;border-radius:2px;background:var(--teal);box-shadow:0 0 8px rgba(53,211,194,.7);transition:left .7s cubic-bezier(.5,0,.3,1)}
+.meter .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:6px}
+.meter .val{text-align:center;font-family:var(--mono);font-size:14px;margin-top:8px;color:var(--text)}
+.meter .val b{color:var(--teal)}
+
+/* capture pool */
+.pool{
+  position:relative;flex:1;min-width:420px;min-height:300px;background:#0C1424;border:1px solid var(--line-soft);
+  border-radius:16px;overflow:hidden;
+}
+.pfrag{
+  position:absolute;height:12px;border-radius:6px;display:flex;align-items:center;
+  transition:left 1s cubic-bezier(.5,0,.3,1),opacity .8s;
+}
+.pfrag .lab{
+  position:absolute;left:50%;top:-19px;transform:translateX(-50%);
+  font-family:var(--mono);font-size:10.5px;color:var(--muted);white-space:nowrap;
+}
+.pfrag .probe{
+  position:absolute;left:14%;right:14%;top:-4px;height:5px;border-radius:3px;opacity:0;transition:opacity .5s;
+}
+.pfrag .bio{
+  position:absolute;right:4%;top:-13px;width:13px;height:13px;border-radius:50%;
+  background:#EDE28A;color:#4A4413;display:grid;place-items:center;font-family:var(--mono);font-size:9px;font-weight:600;
+  opacity:0;transition:opacity .5s;
+}
+.pfrag .sbead{
+  position:absolute;right:-16px;top:-8px;width:20px;height:20px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#E8B287,#9C6236);opacity:0;transition:opacity .5s;
+}
+.pfrag.captured .probe,.pfrag.captured .bio{opacity:1}
+.pfrag.washed{opacity:0}
+
+/* flow cell */
+.fcell{
+  width:420px;max-width:100%;height:170px;border-radius:18px;position:relative;
+  background:linear-gradient(120deg,rgba(53,211,194,.16),rgba(53,211,194,.05) 60%);
+  border:2px solid rgba(53,211,194,.45);box-shadow:inset 0 0 30px rgba(53,211,194,.12);
+  display:flex;flex-direction:column;justify-content:space-evenly;padding:14px 26px;
+}
+.fcell .lane{height:22px;border-radius:11px;background:rgba(6,26,24,.55);border:1px solid rgba(53,211,194,.25);position:relative;overflow:hidden}
+.cluster{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 7px var(--teal);opacity:0;transition:opacity .6s}
+.zoombox{
+  background:#0B1322;border:1px solid var(--line-soft);border-radius:14px;padding:16px 18px;min-width:300px;
+}
+.zoombox .zlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.lawn{position:relative;height:120px;border-bottom:2px solid var(--line);overflow:hidden}
+.oligo{position:absolute;bottom:0;width:2.5px;height:14px;background:#33507F;border-radius:2px}
+.seedst{position:absolute;bottom:0;width:3.5px;border-radius:2px;background:var(--teal);box-shadow:0 0 6px rgba(53,211,194,.6);transition:height .5s}
+.bridge{position:absolute;bottom:0;border:2.5px solid var(--teal);border-bottom:none;border-radius:10px 10px 0 0;opacity:.85;height:26px}
+.countchip{font-family:var(--mono);font-size:13px;color:var(--teal);background:rgba(53,211,194,.08);border:1px solid rgba(53,211,194,.3);border-radius:8px;padding:4px 10px;display:inline-block}
+
+/* SBS */
+.sbswrap{display:flex;flex-direction:column;gap:18px}
+.film{
+  display:flex;gap:7px;align-items:center;background:#0B1322;border:1px solid var(--line-soft);
+  border-radius:12px;padding:10px 14px;min-height:52px;
+}
+.film .flab{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-right:8px}
+.fcellshot{width:26px;height:26px;border-radius:6px;background:#141E33;border:1px solid var(--line-soft);display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:600;color:transparent}
+.seqrow{display:flex;gap:5px;align-items:center;font-family:var(--mono)}
+.baseb{
+  width:44px;height:44px;border-radius:9px;display:grid;place-items:center;
+  font-family:var(--mono);font-size:18px;font-weight:600;border:1.5px solid var(--line);
+  background:var(--panel-2);position:relative;
+}
+.baseb.tmpl{color:var(--muted)}
+.baseb.cur{border-color:var(--teal);box-shadow:0 0 12px rgba(53,211,194,.4);color:var(--text)}
+.baseb.emptyb{border-style:dashed;color:var(--faint)}
+.strandlab{font-size:11px;color:var(--faint);font-family:var(--mono);width:64px;flex:0 0 64px}
+.bA{background:rgba(74,222,128,.16);border-color:var(--A);color:var(--A)}
+.bC{background:rgba(96,165,250,.16);border-color:var(--C);color:var(--C)}
+.bG{background:rgba(251,191,36,.16);border-color:var(--G);color:var(--G)}
+.bT{background:rgba(248,113,113,.16);border-color:var(--T);color:var(--T)}
+.vial{flex-direction:column;gap:6px;padding:10px 16px;font-family:var(--mono);font-weight:600;font-size:17px}
+.vial .drop{width:16px;height:16px;border-radius:50% 50% 50% 4px;transform:rotate(45deg)}
+#flash{
+  position:absolute;inset:0;border-radius:18px;pointer-events:none;opacity:0;z-index:5;
+}
+#flash.go{animation:flashA .55s ease-out}
+@keyframes flashA{0%{opacity:.55}100%{opacity:0}}
+.cyclesteps{display:flex;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+.cyclesteps span{border:1px solid var(--line-soft);border-radius:20px;padding:3px 11px}
+.cyclesteps span.onstep{color:var(--teal);border-color:var(--teal)}
+
+/* basecall / demux */
+.fastq{
+  font-family:var(--mono);font-size:13px;line-height:1.8;background:#0B1322;border:1px solid var(--line-soft);
+  border-radius:12px;padding:16px 20px;overflow-x:auto;white-space:pre;
+}
+.fastq .h{color:var(--faint)}.fastq .q{color:var(--teal)}
+.readcard{
+  display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12.5px;
+  border:1px solid var(--line);background:var(--panel-2);border-radius:10px;padding:8px 12px;
+}
+.readcard .idx{width:14px;height:14px;border-radius:4px;flex:0 0 14px}
+.bin{
+  flex:1;min-width:220px;min-height:150px;border:2px dashed var(--line);border-radius:14px;padding:14px;
+  display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.15);
+}
+.bin .bh{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:4px}
+.bin .bh .sw{width:14px;height:14px;border-radius:4px}
+
+/* overview + finale */
+.mapflow{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:8px 0 4px}
+.mapcard{
+  border:1px solid var(--line-soft);border-radius:14px;padding:14px 16px;background:var(--panel-2);
+  display:flex;flex-direction:column;gap:6px;min-height:108px;
+}
+.mapcard .n{font-family:var(--mono);font-size:11px;color:var(--teal)}
+.mapcard .t{font-weight:600;font-size:14.5px}
+.mapcard .d{font-size:12.5px;color:var(--muted);line-height:1.45}
+.recap{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.recap li{display:flex;gap:14px;padding:10px 4px;border-bottom:1px dashed var(--line-soft);align-items:baseline}
+.recap li:last-child{border-bottom:none}
+.recap .k{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 150px}
+.recap .v{color:var(--muted);font-size:14px}
+.recap .v b{color:var(--text);font-weight:600}
+
+.helper{font-size:12.5px;color:var(--faint);margin-top:14px}
+.centerc{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;padding:20px 0}
+
+@media (max-width:880px){
+  #app{flex-direction:column}
+  #rail{width:auto;flex:none;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;padding:12px 14px;gap:14px;border-right:none;border-bottom:1px solid var(--line-soft)}
+  #brand .sub{display:none}
+  #steps{flex-direction:row;align-items:center}
+  #steps .grp{display:none}
+  #steps li.step button{padding:6px}
+  #steps li.step button .lbl{display:none}
+  #railfoot{display:none}
+  #scenewrap{padding:22px 16px 70px}
+  #stage{padding:16px}
+  .pool{min-width:0}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="rail">
+    <div id="brand">
+      <div class="word">Base <b>by</b> Base</div>
+      <div class="sub">Illumina NGS · hands on</div>
+    </div>
+    <ol id="steps"></ol>
+    <div id="railfoot">Drag reagents onto the bench — or click a reagent, then click its destination.</div>
+  </aside>
+  <main id="main">
+    <div id="scenewrap">
+      <header id="scenehead">
+        <div class="eyebrow"></div>
+        <h1></h1>
+        <p class="lede"></p>
+      </header>
+      <div id="coach"><span class="pin"></span><span id="coachtext"></span></div>
+      <section id="stage"></section>
+      <div id="nav">
+        <button class="btn" id="backBtn">Back</button>
+        <button class="btn primary" id="nextBtn">Next step</button>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============================ tiny helpers ============================ */
+const $=(s,p=document)=>p.querySelector(s);
+function el(tag,cls,html){const n=document.createElement(tag);if(cls)n.className=cls;if(html!=null)n.innerHTML=html;return n;}
+const rand=(a,b)=>a+Math.random()*(b-a);
+const BASECOL={A:"var(--A)",C:"var(--C)",G:"var(--G)",T:"var(--T)"};
+const COMP={A:"T",T:"A",C:"G",G:"C"};
+
+/* Shared run state across scenes (so the story is continuous). */
+const RUN={
+  idxA:null, idxB:null,            // which barcode each patient got
+  read:null,                       // bases called during SBS
+  flashes:[],                      // colors recorded by the "camera"
+};
+
+/* ============================ toast & coach ============================ */
+let toastT=null;
+function toast(msg,kind){
+  const t=$("#toast");t.textContent=msg;t.className="show"+(kind?" "+kind:"");
+  clearTimeout(toastT);toastT=setTimeout(()=>t.className="",3600);
+}
+function coach(msg,win){
+  $("#coachtext").innerHTML=msg;
+  $("#coach").className=win?"win":"";
+}
+
+/* ============================ drag & drop engine ============================
+   Pointer-based drag with a floating ghost, plus a click-to-pick fallback:
+   click a chip to pick it up, click a highlighted zone to place it.        */
+let zones=[];      // {el, handler(payload) -> true | "hint string" | false}
+let picked=null;   // chip picked via click
+function registerZone(zel,handler){zel.classList.add("zone");zones.push({el:zel,handler});
+  zel.addEventListener("click",()=>{if(picked){const p=picked;attemptDrop(zel,p.payload,p.el);} });
+  if(!zel.hasAttribute("tabindex"))zel.setAttribute("tabindex","0");
+  zel.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();zel.click();}});
+}
+function clearScene(){zones=[];picked=null;}
+function zoneAt(x,y){
+  for(const z of zones){
+    if(!document.body.contains(z.el))continue;
+    const r=z.el.getBoundingClientRect();
+    if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return z;
+  }
+  return null;
+}
+function attemptDrop(zel,payload,chipEl){
+  const z=zones.find(z=>z.el===zel);if(!z)return;
+  unpick();
+  const res=z.handler(payload,chipEl);
+  if(res===true)return;
+  zel.classList.remove("deny");void zel.offsetWidth;zel.classList.add("deny");
+  if(typeof res==="string")toast(res,"bad");
+}
+function unpick(){if(picked){picked.el.classList.remove("picked");picked=null;}}
+document.addEventListener("click",e=>{
+  if(picked&&!e.target.closest(".chip")&&!e.target.closest(".zone"))unpick();
+},true);
+
+function makeChip(opts){
+  // opts: {label, sub, glyph(html), payload, cls}
+  const c=el("button","chip"+(opts.cls?" "+opts.cls:""));
+  c.type="button";
+  c.append(el("span","glyph",opts.glyph||""));
+  const tx=el("span","",`<span>${opts.label}</span>`+(opts.sub?`<small>${opts.sub}</small>`:""));
+  c.append(tx);
+  c.payload=opts.payload;
+
+  let start=null,ghost=null,draggingStarted=false;
+  c.addEventListener("pointerdown",e=>{
+    if(c.classList.contains("spent"))return;
+    start={x:e.clientX,y:e.clientY,id:e.pointerId};
+    draggingStarted=false;
+    c.setPointerCapture(e.pointerId);
+  });
+  c.addEventListener("pointermove",e=>{
+    if(!start||e.pointerId!==start.id)return;
+    const dx=e.clientX-start.x,dy=e.clientY-start.y;
+    if(!draggingStarted&&Math.hypot(dx,dy)>7){
+      draggingStarted=true;unpick();
+      ghost=c.cloneNode(true);ghost.classList.add("ghost");ghost.classList.remove("picked");
+      document.body.appendChild(ghost);
+      c.classList.add("dragging");
+    }
+    if(draggingStarted){
+      ghost.style.left=e.clientX+"px";ghost.style.top=e.clientY+"px";
+      const z=zoneAt(e.clientX,e.clientY);
+      zones.forEach(zz=>zz.el.classList.toggle("hot",zz===z));
+    }
+  });
+  const finish=e=>{
+    if(!start||e.pointerId!==start.id)return;
+    zones.forEach(zz=>zz.el.classList.remove("hot"));
+    if(draggingStarted){
+      const z=zoneAt(e.clientX,e.clientY);
+      ghost.remove();ghost=null;c.classList.remove("dragging");
+      if(z)attemptDrop(z.el,c.payload,c);
+    }else{
+      // treat as a click: pick / unpick
+      if(picked&&picked.el===c){unpick();}
+      else{unpick();picked={el:c,payload:c.payload};c.classList.add("picked");
+        toast("Picked up — now click where it should go.");}
+    }
+    start=null;draggingStarted=false;
+  };
+  c.addEventListener("pointerup",finish);
+  c.addEventListener("pointercancel",e=>{
+    if(ghost){ghost.remove();ghost=null;}
+    c.classList.remove("dragging");zones.forEach(zz=>zz.el.classList.remove("hot"));
+    start=null;draggingStarted=false;
+  });
+  return c;
+}
+function spend(chip){chip.classList.add("spent");}
+
+/* tiny inline glyphs (kept deliberately simple) */
+const GL={
+  bottle:c=>`<svg width="22" height="26" viewBox="0 0 22 26"><rect x="8" y="1" width="6" height="5" rx="1" fill="#48597A"/><path d="M6 8h10l2 4v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V12z" fill="none" stroke="#7B8DAD" stroke-width="1.6"/><path d="M5.2 14h11.6v9a1 1 0 0 1-1 1H6.2a1 1 0 0 1-1-1z" fill="${c}" opacity=".8"/></svg>`,
+  drop:c=>`<svg width="20" height="24" viewBox="0 0 20 24"><path d="M10 2C10 2 3 11 3 15.5A7 7 0 0 0 17 15.5C17 11 10 2 10 2z" fill="${c}"/></svg>`,
+  tube:c=>`<svg width="16" height="26" viewBox="0 0 16 26"><rect x="1" y="1" width="14" height="4" rx="1.5" fill="none" stroke="#7B8DAD" stroke-width="1.4"/><path d="M3 5h10v14a5 5 0 0 1-10 0z" fill="none" stroke="#7B8DAD" stroke-width="1.4"/><path d="M4.2 12h7.6v7a3.8 3.8 0 0 1-7.6 0z" fill="${c}"/></svg>`,
+  magnet:()=>`<svg width="20" height="26" viewBox="0 0 20 26"><rect x="3" y="1" width="14" height="11" rx="2" fill="#C2453F"/><rect x="3" y="12" width="14" height="11" rx="2" fill="#3D66C4"/><text x="10" y="9.5" font-size="7" fill="#FFE3E1" text-anchor="middle" font-family="monospace">N</text><text x="10" y="21" font-size="7" fill="#DDE7FF" text-anchor="middle" font-family="monospace">S</text></svg>`,
+  beads:()=>`<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="7" cy="8" r="4" fill="#C9895A"/><circle cx="16" cy="6" r="3" fill="#B57847"/><circle cx="12" cy="16" r="4.5" fill="#D19765"/><circle cx="19" cy="15" r="3" fill="#C9895A"/></svg>`,
+  enzyme:c=>`<svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9z" fill="${c}"/><circle cx="17.5" cy="6.5" r="2.4" fill="${c}" opacity=".55"/></svg>`,
+  adapter:c=>`<svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 12 5 4M12 12l7-8M12 12v9" stroke="#7B8DAD" stroke-width="2.6" stroke-linecap="round"/><rect x="8.5" y="17" width="7" height="6" rx="2" fill="${c}"/></svg>`,
+  probe:c=>`<svg width="26" height="20" viewBox="0 0 26 20"><path d="M2 12q3-7 6 0t6 0 6 0" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/><circle cx="23" cy="6" r="3.2" fill="#EDE28A"/></svg>`,
+  zap:()=>`<svg width="20" height="24" viewBox="0 0 20 24"><path d="M11 2 3 14h6l-2 8 10-13h-6z" fill="#FBBF24"/></svg>`,
+};
+
+/* ============================ scene plumbing ============================ */
+let current=0,unlocked=0,doneFlags=[];
+function saveProg(){try{localStorage.setItem("bbb-unlocked",String(unlocked));}catch(e){}}
+function loadProg(){try{const v=parseInt(localStorage.getItem("bbb-unlocked"));if(!isNaN(v))unlocked=Math.min(v,SCENES.length-1);}catch(e){}}
+
+function markDone(){
+  if(doneFlags[current])return;
+  doneFlags[current]=true;
+  unlocked=Math.max(unlocked,Math.min(current+1,SCENES.length-1));
+  saveProg();renderRail();
+  $("#nextBtn").disabled=false;
+}
+function unDone(){doneFlags[current]=false;$("#nextBtn").disabled=true;}
+
+function renderRail(){
+  const ol=$("#steps");ol.innerHTML="";
+  let lastGrp=null;
+  SCENES.forEach((s,i)=>{
+    if(s.grp!==lastGrp){ol.append(el("div","grp",s.grp));lastGrp=s.grp;}
+    const li=el("li","step"+(i===current?" on":"")+(i<unlocked||doneFlags[i]?" done":""));
+    const b=el("button","", `<span class="dot">${i===0?"·":i}</span><span class="lbl">${s.label}</span>`);
+    b.disabled=i>unlocked;
+    b.addEventListener("click",()=>go(i));
+    li.append(b);ol.append(li);
+  });
+}
+function go(i){
+  current=i;clearScene();
+  const s=SCENES[i];
+  $("#scenehead .eyebrow").textContent=s.eyebrow;
+  $("#scenehead h1").textContent=s.title;
+  $("#scenehead .lede").innerHTML=s.lede;
+  const stage=$("#stage");stage.innerHTML="";
+  $("#backBtn").disabled=i===0;
+  $("#nextBtn").disabled=true;
+  $("#nextBtn").textContent=i===SCENES.length-1?"Run it again":"Next step";
+  doneFlags[i]=false;
+  s.build(stage);
+  if(s.autoDone)markDone();
+  renderRail();
+  window.scrollTo({top:0,behavior:"instant"});
+}
+$("#backBtn").addEventListener("click",()=>{if(current>0)go(current-1);});
+$("#nextBtn").addEventListener("click",()=>{
+  if(current===SCENES.length-1){unlocked=0;saveProg();go(0);return;}
+  if(current<SCENES.length-1)go(current+1);
+});
+
+/* ============================ SCENES ============================ */
+const SCENES=[
+
+/* ---------------- 0 · Overview ---------------- */
+{
+  label:"Overview",grp:"Start",eyebrow:"Interactive walkthrough",
+  title:"From a living cell to a sequenced genome",
+  lede:"Next-generation sequencing turns fragile biological material into billions of short digital reads. In this walkthrough you run every step yourself — at the bench and inside an Illumina sequencer. Nothing advances until <em>you</em> make it happen.",
+  autoDone:true,
+  build(stage){
+    coach("Skim the route, then press <b>Next step</b> to pick up your first pipette.");
+    const steps=[
+      ["01","Cell lysis","Break cells open to release genomic DNA."],
+      ["02","DNA cleanup","Magnetic beads fish DNA out of the cellular debris."],
+      ["03","Fragmentation","Shear long DNA to sequencer-sized pieces."],
+      ["04","End repair & A-tailing","Polish ragged ends so adapters can attach."],
+      ["05","Adapter ligation","Add sequencing adapters and per-sample barcodes."],
+      ["06","Hybrid capture","Pull out only the genes you care about."],
+      ["07","Flow cell & clusters","Seed strands on glass, amplify into clusters."],
+      ["08","Sequencing by synthesis","Build the complement one glowing base at a time."],
+      ["09","Basecalling & demux","Turn flashes into FASTQ and sort reads by barcode."],
+    ];
+    const grid=el("div","mapflow");
+    steps.forEach(([n,t,d])=>{
+      const c=el("div","mapcard");
+      c.append(el("div","n",n),el("div","t",t),el("div","d",d));
+      grid.append(c);
+    });
+    stage.append(grid);
+    stage.append(el("p","helper","Everything here is drag-and-drop (or click a reagent, then click its destination). Wrong moves are safe — the bench will tell you why they don't work, which is half the point."));
+  }
+},
+
+/* ---------------- 1 · Lysis ---------------- */
+{
+  label:"Cell lysis",grp:"Extraction",eyebrow:"Step 1 · Extraction",
+  title:"Crack the cells open",
+  lede:"Genomic DNA is locked inside cell and nuclear membranes. Lysis buffer — detergent to dissolve the lipid membranes plus proteinase K to digest proteins — sets it free.",
+  build(stage){
+    coach("Drag the right reagent onto the sample tube to lyse the cells.");
+    const bench=el("div","bench");
+    const tw=el("div","tube-wrap");
+    tw.append(el("div","tube-name","Patient sample"));
+    const tube=el("div","tube");
+    const liq=el("div","liquid");tube.append(liq);
+    const cells=[];
+    for(let i=0;i<6;i++){
+      const c=el("div","cell");
+      c.style.left=rand(6,68)+"%";c.style.top=rand(8,62)+"%";
+      liq.append(c);cells.push(c);
+    }
+    tw.append(tube);bench.append(tw);
+
+    const note=el("div","readout","Status: <b>intact cells</b><br>DNA accessible: <b>no</b>");
+    bench.append(note);
+    stage.append(bench);
+
+    let lysed=false;
+    registerZone(tube,p=>{
+      if(lysed)return "Already lysed — the DNA is free in solution.";
+      if(p==="pbs")return "PBS is a gentle isotonic buffer — it keeps cells comfortable and intact. We want the opposite.";
+      if(p==="etoh")return "Ethanol comes later, for washing DNA on beads. On whole cells it just fixes them.";
+      if(p==="lysis"){
+        lysed=true;
+        liq.style.background="linear-gradient(180deg,rgba(124,140,248,.10),rgba(124,140,248,.22))";
+        cells.forEach((c,i)=>setTimeout(()=>c.classList.add("pop"),i*130));
+        setTimeout(()=>{
+          for(let i=0;i<5;i++){
+            const s=el("div","squig",`<svg width="34" height="12" viewBox="0 0 34 12"><path d="M1 6q4-7 8 0t8 0 8 0 8 0" fill="none" stroke="#8FB4F0" stroke-width="2" stroke-linecap="round"/></svg>`);
+            s.style.left=rand(2,60)+"%";s.style.top=rand(10,70)+"%";s.style.transform=`rotate(${rand(-30,30)}deg)`;
+            liq.append(s);requestAnimationFrame(()=>s.classList.add("showq"));
+          }
+          for(let i=0;i<8;i++){
+            const g=el("div","grit");g.style.left=rand(4,88)+"%";g.style.top=rand(6,80)+"%";liq.append(g);
+          }
+          note.innerHTML="Status: <b>lysed</b><br>Membranes: dissolved (SDS)<br>Proteins: digested (proteinase K)<br>DNA accessible: <b>yes — but dirty</b>";
+          coach("Cells popped, DNA released. But look at the tube — it's full of debris. On to cleanup.",true);
+          toast("Lysed! Detergent dissolved the membranes; proteinase K chewed up the proteins.","good");
+          markDone();
+        },900);
+        return true;
+      }
+      return false;
+    });
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Reagent shelf"));
+    shelf.append(
+      makeChip({label:"Lysis buffer",sub:"SDS + proteinase K",glyph:GL.bottle("var(--idx1)"),payload:"lysis"}),
+      makeChip({label:"PBS",sub:"isotonic saline",glyph:GL.bottle("#5C6B84"),payload:"pbs"}),
+      makeChip({label:"Ethanol 80%",sub:"wash solution",glyph:GL.bottle("#9FB2CC"),payload:"etoh"}),
+    );
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 2 · Cleanup ---------------- */
+{
+  label:"DNA cleanup",grp:"Extraction",eyebrow:"Step 2 · Extraction",
+  title:"Fish the DNA out of the soup",
+  lede:"The lysate holds DNA plus lipids, digested protein and salts. SPRI beads bind DNA on their carboxylated surface; a magnet then pins the beads so everything else can be washed away.",
+  build(stage){
+    let phase="beads";
+    coach("First: drag the <b>SPRI beads</b> into the lysate.");
+    const bench=el("div","bench");
+    const tw=el("div","tube-wrap");tw.append(el("div","tube-name","Lysate"));
+    const tube=el("div","tube");const liq=el("div","liquid");
+    liq.style.background="linear-gradient(180deg,rgba(124,140,248,.10),rgba(124,140,248,.22))";
+    tube.append(liq);tw.append(tube);bench.append(tw);
+    const squigs=[],grits=[],beads=[];
+    for(let i=0;i<4;i++){
+      const s=el("div","squig showq",`<svg width="34" height="12" viewBox="0 0 34 12"><path d="M1 6q4-7 8 0t8 0 8 0 8 0" fill="none" stroke="#8FB4F0" stroke-width="2" stroke-linecap="round"/></svg>`);
+      s.style.left=rand(2,58)+"%";s.style.top=rand(8,68)+"%";s.style.transform=`rotate(${rand(-30,30)}deg)`;
+      liq.append(s);squigs.push(s);
+    }
+    for(let i=0;i<9;i++){const g=el("div","grit");g.style.left=rand(4,88)+"%";g.style.top=rand(5,82)+"%";liq.append(g);grits.push(g);}
+    const magSlot=el("div");
+    const note=el("div","readout","Lysate contents:<br>· genomic DNA<br>· lipids &amp; digested protein<br>· salts");
+    bench.append(note);
+    stage.append(bench);
+
+    registerZone(tube,p=>{
+      if(p==="beads"&&phase==="beads"){
+        phase="magnet";
+        for(let i=0;i<10;i++){
+          const b=el("div","beadDot");b.style.left=rand(6,86)+"%";b.style.top=rand(6,80)+"%";
+          liq.append(b);beads.push(b);
+        }
+        coach("The beads' carboxyl surface grabs DNA (in the right salt/PEG mix). Now drag the <b>magnet</b> to the tube.");
+        toast("Beads in — DNA is binding to their surface.","good");
+        return true;
+      }
+      if(p==="magnet"&&phase==="magnet"){
+        phase="wash";
+        const m=el("div","magnet");m.append(el("div","n","N"),el("div","s","S"));
+        m.style.position="absolute";m.style.left="-58px";m.style.top="30px";
+        tube.style.overflow="visible";tube.append(m);
+        beads.forEach(b=>{b.style.left="4%";b.style.top=(28+rand(0,36))+"%";});
+        squigs.forEach(s=>{s.style.transition="all .8s";s.style.left="2%";s.style.opacity=".9";});
+        coach("Beads (with DNA aboard) are pinned to the wall. Now drag the <b>ethanol wash</b> in to rinse out the junk.");
+        toast("Magnet on — the pellet forms against the tube wall.","good");
+        return true;
+      }
+      if(p==="etoh"&&phase==="wash"){
+        phase="elute";
+        grits.forEach(g=>g.style.opacity="0");
+        liq.style.background="linear-gradient(180deg,rgba(159,178,204,.06),rgba(159,178,204,.14))";
+        note.innerHTML="Washed 2× with 80% EtOH<br>· lipids: <b>gone</b><br>· protein: <b>gone</b><br>· salts: <b>gone</b><br>DNA: still on the beads";
+        coach("Sparkling. Last move: drag the <b>elution buffer</b> in to release the DNA from the beads.");
+        toast("Two ethanol washes — contaminants down the drain, DNA stays put.","good");
+        return true;
+      }
+      if(p==="elution"&&phase==="elute"){
+        phase="done";
+        beads.forEach(b=>{b.style.left=rand(6,86)+"%";b.style.top=rand(6,80)+"%";b.style.opacity=".25";});
+        squigs.forEach(s=>{s.style.left=rand(4,56)+"%";s.style.opacity="1";});
+        liq.style.background="linear-gradient(180deg,rgba(53,211,194,.12),rgba(53,211,194,.26))";
+        note.innerHTML="Eluted in low-salt buffer<br>Yield: <b>1.4 µg</b> genomic DNA<br>A260/280: <b>1.86</b> (clean)";
+        coach("Pure genomic DNA in solution. Onwards — it's far too long to sequence yet.",true);
+        toast("Low salt breaks the bead–DNA bond. Clean DNA, eluted.","good");
+        markDone();
+        return true;
+      }
+      // wrong order — teach the order
+      const hints={
+        beads:"Beads are already in.",magnet:"Nothing to pull yet — add the beads first so the DNA has something to bind.",
+        etoh:phase==="beads"?"Washing now would flush the DNA away too — bind it to beads first.":"Pin the beads with the magnet first, or the wash will carry them off.",
+        elution:"Elution is the last move — bind, pin and wash before you release the DNA."
+      };
+      return hints[p]||false;
+    });
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Reagent shelf"));
+    shelf.append(
+      makeChip({label:"SPRI beads",sub:"carboxylated, magnetic",glyph:GL.beads(),payload:"beads"}),
+      makeChip({label:"Magnet",sub:"neodymium stand",glyph:GL.magnet(),payload:"magnet"}),
+      makeChip({label:"Ethanol 80%",sub:"wash ×2",glyph:GL.bottle("#9FB2CC"),payload:"etoh"}),
+      makeChip({label:"Elution buffer",sub:"10 mM Tris, low salt",glyph:GL.bottle("var(--teal)"),payload:"elution"}),
+    );
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 3 · Fragmentation ---------------- */
+{
+  label:"Fragmentation",grp:"Library prep",eyebrow:"Step 3 · Library prep",
+  title:"Shear it down to size",
+  lede:"Genomic DNA is millions of bases long; an Illumina flow cell wants inserts around 300–500 bp. Acoustic shearing (sonication) snaps the DNA — the longer you pulse, the shorter it gets. Overdo it and the library is ruined.",
+  build(stage){
+    let loaded=false,size=null,doneOk=false;
+    const SIZES=[1200,700,420,180];let press=0;
+    coach("Drag the <b>DNA tube</b> into the sonicator.");
+    const bench=el("div","bench");
+
+    const mach=el("div","machine");
+    mach.append(el("div","title","Focused ultrasonicator"));
+    const slot=el("div","slot","Load<br>sample tube");
+    mach.append(slot);
+    const pulseBtn=el("button","btn","Pulse · 30 s");pulseBtn.disabled=true;
+    const resetBtn=el("button","btn","Start over with fresh DNA");resetBtn.style.display="none";
+    mach.append(pulseBtn,resetBtn);
+    bench.append(mach);
+
+    const right=el("div");
+    const meter=el("div","meter");
+    meter.append(el("div","zlab"));
+    const track=el("div","track");
+    const win=el("div","win");
+    // scale 0..1500 bp mapped to 0..100%
+    const pct=bp=>Math.min(100,bp/1500*100);
+    win.style.left=pct(300)+"%";win.style.width=(pct(500)-pct(300))+"%";
+    const needle=el("div","needle");needle.style.left="calc("+pct(1200)+"% - 1px)";needle.style.opacity="0";
+    track.append(win,needle);
+    meter.append(track);
+    const scale=el("div","scale","<span>0</span><span>300</span><span>500</span><span>1000</span><span>1500 bp</span>");
+    meter.append(scale);
+    const val=el("div","val","mean fragment size: <b>—</b>");
+    meter.append(val);
+    right.append(meter);
+    const fragvis=el("div","fragtray");fragvis.style.marginTop="18px";
+    right.append(fragvis);
+    bench.append(right);
+    stage.append(bench);
+
+    function drawFrags(bp){
+      fragvis.innerHTML="";
+      const w=Math.max(26,Math.min(300,bp/1500*300));
+      for(let i=0;i<3;i++){
+        const f=el("div","frag");
+        const t=el("div","strand");t.style.width=w+"px";
+        const b=el("div","strand bot");b.style.width=w+"px";
+        f.append(t,b);fragvis.append(f);
+      }
+    }
+    function setSize(bp){
+      size=bp;needle.style.opacity="1";
+      needle.style.left="calc("+pct(bp)+"% - 1px)";
+      val.innerHTML="mean fragment size: <b>"+bp+" bp</b>";
+      drawFrags(bp);
+    }
+
+    registerZone(slot,p=>{
+      if(p!=="dnatube")return false;
+      if(loaded)return "The tube is already in the sonicator.";
+      loaded=true;
+      slot.classList.add("loaded");
+      slot.innerHTML=GL.tube("var(--teal)");
+      pulseBtn.disabled=false;
+      setSize(1200);
+      coach("Loaded. Press <b>Pulse</b> and watch the size meter — stop inside the green window (300–500 bp).");
+      return true;
+    });
+
+    pulseBtn.addEventListener("click",()=>{
+      if(press>=SIZES.length-1&&doneOk===false)return;
+      press=Math.min(press+1,SIZES.length-1);
+      mach.classList.remove("buzz");void mach.offsetWidth;mach.classList.add("buzz");
+      setSize(SIZES[press]);
+      if(SIZES[press]>=300&&SIZES[press]<=500){
+        doneOk=true;
+        coach("420 bp — right in the window. You can proceed… though the button still works, if curiosity wins.",true);
+        toast("Perfect shear. Insert size ≈ 420 bp.","good");
+        markDone();
+      }else if(SIZES[press]<300){
+        doneOk=false;unDone();
+        pulseBtn.disabled=true;resetBtn.style.display="";
+        coach("Over-sheared — at 180 bp the inserts are shorter than the reads and the library is unusable. It happens to everyone once.");
+        toast("Too far! Sonication is irreversible — start over with fresh DNA.","bad");
+      }else{
+        coach("Shorter… keep pulsing until the needle sits in the green window.");
+      }
+    });
+    resetBtn.addEventListener("click",()=>{
+      press=0;setSize(1200);doneOk=false;
+      pulseBtn.disabled=false;resetBtn.style.display="none";
+      coach("Fresh aliquot loaded. Pulse until you're inside 300–500 bp — and this time, stop.");
+    });
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Bench"));
+    shelf.append(makeChip({label:"Purified DNA",sub:"1.4 µg, from step 2",glyph:GL.tube("var(--teal)"),payload:"dnatube"}));
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 4 · End repair & A-tailing ---------------- */
+{
+  label:"End repair",grp:"Library prep",eyebrow:"Step 4 · Library prep",
+  title:"Polish the broken ends",
+  lede:"Shearing leaves ragged, uneven ends. End-repair enzymes trim and fill them flush; then a single <span style='font-family:var(--mono);color:var(--A)'>A</span> is added to each 3′ end — the hook that adapters (which carry a matching <span style='font-family:var(--mono);color:var(--T)'>T</span>) will grab onto.",
+  build(stage){
+    let phase="repair";
+    coach("Drag the <b>end-repair mix</b> onto the fragments.");
+    const bench=el("div","bench");
+    const tray=el("div","fragtray");
+    const frs=[];
+    for(let i=0;i<3;i++){
+      const f=el("div","frag");
+      const t=el("div","strand"),b=el("div","strand bot");
+      // ragged: offset widths & margins
+      t.style.width="240px";t.style.marginLeft=(i*8)+"px";
+      b.style.width=(190+i*14)+"px";b.style.marginLeft=(26-i*6)+"px";
+      const al=el("span","aTag l","A"),ar=el("span","aTag r","A");
+      f.append(t,b,al,ar);tray.append(f);frs.push({f,t,b,al,ar});
+    }
+    bench.append(tray);
+    const note=el("div","readout","Fragment ends: <b>ragged</b><br>5′ phosphates: missing<br>3′ A-overhang: absent");
+    bench.append(note);
+    stage.append(bench);
+
+    registerZone(tray,p=>{
+      if(p==="repair"&&phase==="repair"){
+        phase="atail";
+        frs.forEach(({t,b})=>{t.style.width="240px";t.style.marginLeft="12px";b.style.width="240px";b.style.marginLeft="12px";});
+        note.innerHTML="Fragment ends: <b>blunt</b><br>5′ phosphates: <b>restored (PNK)</b><br>3′ A-overhang: absent";
+        coach("Blunt and phosphorylated. Now drag the <b>A-tailing enzyme</b> on to add the 3′ A overhangs.");
+        toast("T4 polymerase filled the overhangs; PNK re-added 5′ phosphates.","good");
+        return true;
+      }
+      if(p==="atail"&&phase==="atail"){
+        phase="done";
+        frs.forEach(({al,ar})=>{al.classList.add("showq");ar.classList.add("showq");});
+        note.innerHTML="Fragment ends: <b>blunt + A-overhang</b><br>Ready for adapter ligation: <b>yes</b>";
+        coach("Every fragment now ends in a single A — a sticky hook for the adapters. Next!",true);
+        toast("A-tailed. The single-base overhang prevents fragments ligating to each other.","good");
+        markDone();
+        return true;
+      }
+      if(p==="ligase")return "Ligase has nothing to join yet — there are no adapters in the tube. It comes two steps from now.";
+      if(p==="atail"&&phase==="repair")return "A-tailing enzymes need a blunt end to work on — repair the ragged ends first.";
+      if(p==="repair")return "Ends are already repaired.";
+      return false;
+    });
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Enzyme rack"));
+    shelf.append(
+      makeChip({label:"End-repair mix",sub:"T4 pol + T4 PNK",glyph:GL.enzyme("var(--sky)"),payload:"repair"}),
+      makeChip({label:"A-tailing enzyme",sub:"Klenow exo⁻ + dATP",glyph:GL.enzyme("var(--A)"),payload:"atail"}),
+      makeChip({label:"DNA ligase",sub:"T4 ligase",glyph:GL.enzyme("var(--violet)"),payload:"ligase"}),
+    );
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 5 · Adapter ligation ---------------- */
+{
+  label:"Adapters",grp:"Library prep",eyebrow:"Step 5 · Library prep",
+  title:"Adapters on, barcodes in",
+  lede:"Adapters are short synthetic DNA that let fragments bind the flow cell and prime sequencing. Each also carries an <b>index barcode</b> — a per-sample tag, so many patients can be pooled in one run and computationally separated later.",
+  build(stage){
+    coach("Two patients, one upcoming run. Drag a <b>different</b> indexed adapter into each tube.");
+    const bench=el("div","bench");
+    const tubes={};
+    ["A","B"].forEach(k=>{
+      const tw=el("div","tube-wrap");
+      tw.append(el("div","tube-name","Patient "+k));
+      const tube=el("div","tube");const liq=el("div","liquid");
+      liq.style.background="linear-gradient(180deg,rgba(53,211,194,.10),rgba(53,211,194,.2))";
+      tube.append(liq);
+      const tray=el("div","fragtray");tray.style.minWidth="0";tray.style.position="absolute";
+      tray.style.inset="18% 10% auto 12%";tray.style.gap="12px";
+      for(let i=0;i<2;i++){
+        const f=el("div","frag");
+        const t=el("div","strand"),b=el("div","strand bot");
+        t.style.width="100%";b.style.width="100%";
+        const lA=el("span","adTag"),rA=el("span","adTag");
+        lA.style.left="-8px";rA.style.right="-8px";
+        f.append(t,b,lA,rA);tray.append(f);
+      }
+      liq.append(tray);
+      tw.append(tube);bench.append(tw);
+      tubes[k]={tube,liq,tray,idx:null,ligated:false};
+    });
+    const note=el("div","readout","Pooling plan:<br>Patient A → index <b>—</b><br>Patient B → index <b>—</b>");
+    bench.append(note);
+    stage.append(bench);
+
+    const IDXCOL={D701:"var(--idx1)",D702:"var(--idx2)"};
+    let ligChip,poolBtn;
+    function refreshNote(){
+      note.innerHTML="Pooling plan:<br>Patient A → index <b style='color:"+(tubes.A.idx?IDXCOL[tubes.A.idx]:"inherit")+"'>"+(tubes.A.idx||"—")+"</b><br>Patient B → index <b style='color:"+(tubes.B.idx?IDXCOL[tubes.B.idx]:"inherit")+"'>"+(tubes.B.idx||"—")+"</b>";
+    }
+    function tagFrags(k){
+      const t=tubes[k];
+      t.tray.querySelectorAll(".adTag").forEach(a=>{
+        a.style.background=IDXCOL[t.idx];a.classList.add("showq");
+      });
+    }
+    ["A","B"].forEach(k=>{
+      registerZone(tubes[k].tube,(p,chipEl)=>{
+        const t=tubes[k];
+        if(p==="D701"||p==="D702"){
+          if(t.idx)return "Patient "+k+" already has an adapter. One index per sample.";
+          const other=tubes[k==="A"?"B":"A"];
+          if(other.idx===p)return "Both patients with "+p+"? After pooling you could never tell their reads apart. Use a different index.";
+          t.idx=p;tagFrags(k);refreshNote();
+          if(k==="A")RUN.idxA=p;else RUN.idxB=p;
+          spend(chipEl);
+          if(tubes.A.idx&&tubes.B.idx){
+            coach("Indexes assigned. Now drag the <b>T4 ligase</b> onto each tube to seal the adapters on.");
+          }else{
+            coach("One down. Give the other patient a <b>different</b> index.");
+          }
+          toast("Index "+p+" adapters added to Patient "+k+".","good");
+          return true;
+        }
+        if(p==="ligase"){
+          if(!(tubes.A.idx&&tubes.B.idx))return "Add adapters to both samples first — ligase needs something to join.";
+          if(t.ligated)return "Patient "+k+" is already ligated.";
+          t.ligated=true;
+          t.tray.querySelectorAll(".adTag").forEach(a=>a.style.boxShadow="0 0 8px rgba(255,255,255,.25)");
+          toast("Ligase sealed the nicks — adapters are now covalently attached (Patient "+k+").","good");
+          if(tubes.A.ligated&&tubes.B.ligated){
+            ligChip.classList.add("spent");
+            coach("Both libraries complete. Press <b>Pool libraries</b> to combine them for one run.");
+            poolBtn.disabled=false;
+          }else{
+            coach("One sealed. Ligase onto the other tube too.");
+          }
+          return true;
+        }
+        return false;
+      });
+    });
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Adapter plate & enzymes"));
+    ligChip=makeChip({label:"T4 DNA ligase",sub:"seals adapter to insert",glyph:GL.enzyme("var(--violet)"),payload:"ligase"});
+    poolBtn=el("button","btn primary","Pool libraries");poolBtn.disabled=true;
+    shelf.append(
+      makeChip({label:"Adapter · index D701",sub:"ATTACTCG",glyph:GL.adapter("var(--idx1)"),payload:"D701"}),
+      makeChip({label:"Adapter · index D702",sub:"TCCGGAGA",glyph:GL.adapter("var(--idx2)"),payload:"D702"}),
+      ligChip,poolBtn,
+    );
+    stage.append(shelf);
+
+    poolBtn.addEventListener("click",()=>{
+      poolBtn.disabled=true;
+      tubes.B.tube.parentElement.style.transition="all .8s";
+      tubes.B.tube.parentElement.style.opacity="0";
+      tubes.B.tube.parentElement.style.transform="translateX(-60px)";
+      tubes.A.tube.parentElement.querySelector(".tube-name").textContent="Pooled library";
+      const extra=tubes.A.tray.children[1];
+      if(extra){extra.querySelectorAll(".adTag").forEach(a=>a.style.background=IDXCOL[tubes.B.idx]);}
+      coach("One tube, two patients, distinguishable forever by their barcodes. That's multiplexing.",true);
+      toast("Libraries pooled.","good");
+      markDone();
+    });
+  }
+},
+
+/* ---------------- 6 · Hybrid capture ---------------- */
+{
+  label:"Hybrid capture",grp:"Enrichment",eyebrow:"Step 6 · Target enrichment",
+  title:"Pull out the genes that matter",
+  lede:"Sequencing a whole genome to look at three genes is wasteful. Biotinylated probes — synthetic single strands complementary to your targets — hybridize only to matching fragments. Streptavidin beads then grab the biotin, and everything else washes away.",
+  build(stage){
+    const targets=[
+      {gene:"BRCA1",col:"var(--rose)"},
+      {gene:"TP53",col:"var(--violet)"},
+      {gene:"EGFR",col:"var(--sky)"},
+    ];
+    let capturedN=0,phase="probes";
+    coach("Drag each <b>capture probe</b> onto the fragment whose sequence it matches (the colors show complementarity).");
+    const bench=el("div","bench");
+    const pool=el("div","pool");
+    const frags=[];
+    const pos=[[8,14],[52,26],[20,44],[62,58],[10,74],[55,82]];
+    const order=["BRCA1","off","TP53","off","EGFR","off"];
+    order.forEach((g,i)=>{
+      const t=targets.find(t=>t.gene===g);
+      const f=el("div","pfrag");
+      f.style.left=pos[i][0]+"%";f.style.top=pos[i][1]+"%";
+      f.style.width=rand(120,160)+"px";
+      f.style.background=t?t.col:"#3A4A63";
+      f.append(el("span","lab",t?t.gene:"off-target"));
+      const probe=el("span","probe");if(t)probe.style.background=t.col;
+      const bio=el("span","bio","B");
+      const sb=el("span","sbead");
+      f.append(probe,bio,sb);
+      pool.append(f);
+      frags.push({el:f,gene:g,captured:false});
+      if(t){
+        registerZone(f,p=>{
+          if(phase!=="probes")return false;
+          if(p==="beadsSA"||p==="magnet"||p==="wash")return "Probes first — the beads and magnet only work once biotinylated probes are hybridized.";
+          if(!p.startsWith("probe:"))return false;
+          const pg=p.split(":")[1];
+          if(pg!==g)return "No hybridization — the "+pg+" probe's sequence doesn't pair with "+g+". Complementarity is the whole trick.";
+          if(f.classList.contains("captured"))return "Already hybridized.";
+          f.classList.add("captured");
+          capturedN++;
+          toast(pg+" probe hybridized — note the biotin (B) tag it carries.","good");
+          if(capturedN===3){
+            phase="beads";
+            coach("All three targets tagged. Now drag the <b>streptavidin beads</b> into the pool.");
+          }
+          return true;
+        });
+      }
+    });
+    bench.append(pool);
+    const note=el("div","readout","Panel: BRCA1 · TP53 · EGFR<br>On-target fragments: 3 / 6<br>Captured: <b>0</b>");
+    bench.append(note);
+    stage.append(bench);
+
+    registerZone(pool,p=>{
+      if(p.startsWith("probe:"))return "Drop the probe onto the matching colored fragment itself.";
+      if(p==="beadsSA"){
+        if(phase!=="beads")return capturedN<3?"Hybridize all three probes first.":"Beads are already in.";
+        phase="magnet";
+        frags.forEach(f=>{if(f.el.classList.contains("captured"))f.el.querySelector(".sbead").style.opacity="1";});
+        note.innerHTML="Panel: BRCA1 · TP53 · EGFR<br>Streptavidin ⇢ biotin: <b>bound</b><br>K<sub>d</sub> ≈ 10⁻¹⁴ M — nature's superglue";
+        coach("Streptavidin locked onto biotin. Drag the <b>magnet</b> to the pool wall.");
+        toast("Streptavidin–biotin: one of the strongest non-covalent bonds known.","good");
+        return true;
+      }
+      if(p==="magnet"){
+        if(phase!=="magnet")return phase==="probes"?"Probes first, then beads, then magnet.":phase==="beads"?"Add the streptavidin beads first — the magnet has nothing to grab.":"Already pinned.";
+        phase="wash";
+        frags.forEach(f=>{
+          if(f.el.classList.contains("captured"))f.el.style.left="12px";
+        });
+        coach("Targets pinned to the wall. Drag the <b>wash buffer</b> in to flush everything unbound.");
+        toast("Magnet on — bead-bound targets held fast.","good");
+        return true;
+      }
+      if(p==="wash"){
+        if(phase!=="wash")return "Not yet — bind and pin the targets before washing, or you'll lose them.";
+        phase="done";
+        frags.forEach(f=>{if(!f.el.classList.contains("captured"))f.el.classList.add("washed");});
+        note.innerHTML="Captured: <b>3 / 3 targets</b><br>Off-target: washed away<br>Enrichment: ~99% reads on-panel";
+        coach("Only your panel remains. Every sequencing dollar now lands on BRCA1, TP53 and EGFR.",true);
+        toast("Off-target DNA washed away. Enrichment complete.","good");
+        markDone();
+        return true;
+      }
+      return false;
+    });
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Capture kit"));
+    targets.forEach(t=>{
+      shelf.append(makeChip({label:t.gene+" probe",sub:"biotinylated ssDNA",glyph:GL.probe(t.col),payload:"probe:"+t.gene}));
+    });
+    shelf.append(
+      makeChip({label:"Streptavidin beads",sub:"magnetic",glyph:GL.beads(),payload:"beadsSA"}),
+      makeChip({label:"Magnet",sub:"",glyph:GL.magnet(),payload:"magnet"}),
+      makeChip({label:"Wash buffer",sub:"stringent, heated",glyph:GL.bottle("#9FB2CC"),payload:"wash"}),
+    );
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 7 · Flow cell ---------------- */
+{
+  label:"Flow cell",grp:"Sequencing",eyebrow:"Step 7 · On the instrument",
+  title:"Seed the flow cell, grow the clusters",
+  lede:"The flow cell is a glass channel carpeted with a lawn of oligos matching the adapters. Single-stranded library hybridizes to the lawn, then <b>bridge amplification</b> copies each molecule into a tight cluster of ~1,000 clones — bright enough for the camera to see.",
+  build(stage){
+    let phase="naoh";
+    coach("The library is double-stranded, but only single strands can hybridize to the lawn. Drag the <b>NaOH</b> onto the library tube.");
+    const bench=el("div","bench");
+
+    const tw=el("div","tube-wrap");
+    tw.append(el("div","tube-name","Enriched library"));
+    const tube=el("div","tube");tube.style.width="86px";tube.style.height="140px";
+    const liq=el("div","liquid");liq.style.background="linear-gradient(180deg,rgba(53,211,194,.12),rgba(53,211,194,.24))";
+    tube.append(liq);tw.append(tube);
+    bench.append(tw);
+
+    const fcwrap=el("div","tube-wrap");
+    fcwrap.append(el("div","tube-name","Flow cell"));
+    const fc=el("div","fcell");
+    for(let i=0;i<3;i++){
+      const lane=el("div","lane");
+      fc.append(lane);
+    }
+    fcwrap.append(fc);
+    bench.append(fcwrap);
+    stage.append(bench);
+
+    const zoom=el("div","zoombox");
+    zoom.append(el("div","zlab","Zoom · one tile of the lawn"));
+    const lawn=el("div","lawn");
+    for(let i=0;i<64;i++){
+      const o=el("div","oligo");o.style.left=(i/64*100+rand(-.4,.4))+"%";
+      o.style.height=rand(10,16)+"px";lawn.append(o);
+    }
+    zoom.append(lawn);
+    const ctrl=el("div");ctrl.style.marginTop="14px";ctrl.style.display="flex";ctrl.style.gap="12px";ctrl.style.alignItems="center";ctrl.style.flexWrap="wrap";
+    const ampBtn=el("button","btn","Run amplification cycle");ampBtn.disabled=true;
+    const count=el("span","countchip","0 copies");
+    ctrl.append(ampBtn,count);
+    zoom.append(ctrl);
+    const benchrow=el("div","bench");benchrow.style.marginTop="22px";
+    benchrow.append(zoom);
+    stage.append(benchrow);
+
+    registerZone(tube,p=>{
+      if(p==="naoh"&&phase==="naoh"){
+        phase="load";
+        liq.style.background="linear-gradient(180deg,rgba(251,191,36,.10),rgba(251,191,36,.2))";
+        coach("Denatured — the two strands have melted apart. Now drag the <b>library</b> onto the flow cell.");
+        toast("0.1 N NaOH breaks the hydrogen bonds: dsDNA → ssDNA.","good");
+        return true;
+      }
+      if(p==="naoh")return "Already denatured.";
+      if(p==="library")return "That's the library's own tube.";
+      return false;
+    });
+    registerZone(fc,p=>{
+      if(p==="library"){
+        if(phase==="naoh")return "Double-stranded DNA can't hybridize to the lawn — denature it with NaOH first.";
+        if(phase!=="load")return "The flow cell is already seeded.";
+        phase="amp";
+        // seed strands in zoom
+        const seeds=[30];
+        seeds.forEach(x=>{
+          const s=el("div","seedst");s.style.left=x+"%";s.style.height="0px";lawn.append(s);
+          requestAnimationFrame(()=>s.style.height="46px");
+        });
+        count.textContent="1 copy";
+        ampBtn.disabled=false;
+        coach("A single molecule has hybridized on this tile (thousands more across the lanes). Run <b>bridge amplification</b> cycles — each one doubles the cluster.");
+        toast("Library loaded. Adapter ends found their complements on the lawn.","good");
+        return true;
+      }
+      if(p==="naoh")return "NaOH goes into the library tube, not the flow cell.";
+      return false;
+    });
+
+    let copies=1,cycles=0;
+    ampBtn.addEventListener("click",()=>{
+      cycles++;copies*=2;
+      // draw doubling strands clustered near x=30
+      const spread=Math.min(26,4+cycles*4);
+      const n=Math.min(copies,40);
+      lawn.querySelectorAll(".seedst").forEach((s,i)=>{if(i>0)s.remove();});
+      for(let i=1;i<n;i++){
+        const s=el("div","seedst");s.style.left=(30+rand(-spread,spread))+"%";
+        s.style.height="0px";lawn.append(s);
+        requestAnimationFrame(()=>s.style.height=rand(34,48)+"px");
+      }
+      // a transient bridge arc
+      const b=el("div","bridge");b.style.left=(28+rand(-8,8))+"%";b.style.width=rand(20,34)+"px";
+      lawn.append(b);setTimeout(()=>b.remove(),700);
+      count.textContent=copies>=1000?"≈"+copies.toLocaleString()+" copies":copies+" copies";
+      if(cycles<10){
+        coach("Cycle "+cycles+": strands arch over, bridge to a neighboring oligo, and get copied. "+copies+" identical molecules and counting.");
+      }
+      if(cycles===10){
+        ampBtn.disabled=true;
+        count.textContent="≈1,000 copies · 1 cluster";
+        // light up clusters on the flow cell
+        fc.querySelectorAll(".lane").forEach(lane=>{
+          for(let i=0;i<14;i++){
+            const cl=el("div","cluster");
+            cl.style.left=rand(2,96)+"%";cl.style.top=rand(10,60)+"%";
+            lane.append(cl);
+            setTimeout(()=>cl.style.opacity="1",rand(100,900));
+          }
+        });
+        coach("After ~10 cycles every seeded molecule is a glowing cluster of clones. The flow cell is ready to sequence.",true);
+        toast("Millions of clusters formed across the lanes.","good");
+        markDone();
+      }
+    });
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Instrument loading station"));
+    shelf.append(
+      makeChip({label:"NaOH 0.1 N",sub:"denaturant",glyph:GL.bottle("var(--G)"),payload:"naoh"}),
+      makeChip({label:"Denatured library",sub:"single-stranded",glyph:GL.tube("var(--G)"),payload:"library"}),
+    );
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 8 · SBS ---------------- */
+{
+  label:"Sequencing",grp:"Sequencing",eyebrow:"Step 8 · Sequencing by synthesis",
+  title:"Read it by building it",
+  lede:"Each cycle, one fluorescent, reversibly-terminated nucleotide is incorporated opposite the template base. The camera photographs the flash, the terminator and dye are cleaved, and the next cycle begins. You are the polymerase — pair each base correctly.",
+  build(stage){
+    const TMPL="TGCACGTA".split("");   // template, shown 3'→5'
+    let pos=0;
+    RUN.read="";RUN.flashes=[];
+    coach("The template's first base is <b style='font-family:var(--mono)'>"+TMPL[0]+"</b>. Drag the nucleotide that pairs with it into the active site.");
+    const wrap=el("div","sbswrap");
+
+    const film=el("div","film");
+    film.append(el("span","flab","Camera"));
+    const shots=[];
+    for(let i=0;i<TMPL.length;i++){const sh=el("div","fcellshot","·");film.append(sh);shots.push(sh);}
+    wrap.append(film);
+
+    const steps=el("div","cyclesteps");
+    const st1=el("span","onstep","1 · incorporate"),st2=el("span","","2 · image"),st3=el("span","","3 · cleave terminator");
+    steps.append(st1,st2,st3);
+    wrap.append(steps);
+
+    const readRow=el("div","seqrow");
+    readRow.append(el("span","strandlab","read 5′→3′"));
+    const readCells=[];
+    for(let i=0;i<TMPL.length;i++){
+      const c=el("div","baseb emptyb","·");readRow.append(c);readCells.push(c);
+    }
+    wrap.append(readRow);
+
+    const tmplRow=el("div","seqrow");
+    tmplRow.append(el("span","strandlab","template 3′→5′"));
+    const tmplCells=[];
+    TMPL.forEach((b,i)=>{
+      const c=el("div","baseb tmpl",b);tmplRow.append(c);tmplCells.push(c);
+    });
+    wrap.append(tmplRow);
+    stage.append(wrap);
+
+    const flash=el("div");flash.id="flash";stage.append(flash);
+    tmplCells[0].classList.add("cur");
+    readCells[0].classList.remove("emptyb");readCells[0].classList.add("cur");
+
+    const FLASHBG={A:"rgba(74,222,128,.5)",C:"rgba(96,165,250,.5)",G:"rgba(251,191,36,.5)",T:"rgba(248,113,113,.5)"};
+    function activeCell(){return readCells[pos];}
+    function arm(){
+      registerZone(activeCell(),p=>{
+        if(!p.startsWith("nt:"))return false;
+        const base=p.split(":")[1];
+        const need=COMP[TMPL[pos]];
+        if(base!==need){
+          return base+" doesn't pair with "+TMPL[pos]+" — remember A·T and G·C. The polymerase would reject it too.";
+        }
+        // incorporate
+        const cell=activeCell();
+        cell.textContent=base;cell.classList.remove("emptyb","cur");
+        cell.classList.add("b"+base);
+        tmplCells[pos].classList.remove("cur");
+        RUN.read+=base;
+        // image
+        st1.classList.remove("onstep");st2.classList.add("onstep");
+        flash.style.background="radial-gradient(circle at 50% 45%,"+FLASHBG[base]+",transparent 60%)";
+        flash.classList.remove("go");void flash.offsetWidth;flash.classList.add("go");
+        shots[pos].style.background=FLASHBG[base].replace(".5",".9");
+        shots[pos].style.borderColor="transparent";
+        RUN.flashes.push(base);
+        const donePos=pos;
+        setTimeout(()=>{
+          st2.classList.remove("onstep");st3.classList.add("onstep");
+          setTimeout(()=>{
+            st3.classList.remove("onstep");st1.classList.add("onstep");
+            if(donePos<TMPL.length-1&&donePos===pos){}
+          },350);
+        },350);
+        pos++;
+        if(pos<TMPL.length){
+          tmplCells[pos].classList.add("cur");
+          const nc=activeCell();nc.classList.remove("emptyb");nc.classList.add("cur");
+          coach("Flash recorded. Terminator cleaved. Next template base: <b style='font-family:var(--mono)'>"+TMPL[pos]+"</b>.");
+          arm();
+        }else{
+          coach("Eight cycles, eight photographs. The camera strip above <i>is</i> your read — every cluster on the flow cell produced one, in parallel.",true);
+          toast("Read complete: "+RUN.read,"good");
+          markDone();
+        }
+        return true;
+      });
+    }
+    arm();
+
+    const shelf=el("div","shelf");
+    shelf.append(el("div","shelf-label","Fluorescent nucleotides · reversible terminators"));
+    ["A","C","G","T"].forEach(b=>{
+      shelf.append(makeChip({label:b,sub:"dNTP",cls:"vial",glyph:GL.drop(BASECOL[b]),payload:"nt:"+b}));
+    });
+    stage.append(shelf);
+  }
+},
+
+/* ---------------- 9 · Basecalling & demux ---------------- */
+{
+  label:"Basecalling",grp:"Analysis",eyebrow:"Step 9 · From light to data",
+  title:"Flashes become files",
+  lede:"The instrument's software converts each cluster's photo sequence into bases with quality scores — the FASTQ format. Then the index barcodes you ligated in step 5 are read too, and every read is <b>demultiplexed</b> back to its patient.",
+  build(stage){
+    const read=(RUN.read&&RUN.read.length===8)?RUN.read:"ACGTGCAT";
+    const idxA=RUN.idxA||"D701",idxB=RUN.idxB||"D702";
+    const IDXCOL={D701:"var(--idx1)",D702:"var(--idx2)"};
+    const IDXSEQ={D701:"ATTACTCG",D702:"TCCGGAGA"};
+    coach("Press <b>Call bases</b> to run the basecaller on your camera strip.");
+
+    const wrap=el("div","sbswrap");
+    const film=el("div","film");
+    film.append(el("span","flab","Camera"));
+    const FLASHBG={A:"rgba(74,222,128,.9)",C:"rgba(96,165,250,.9)",G:"rgba(251,191,36,.9)",T:"rgba(248,113,113,.9)"};
+    const shots=[];
+    read.split("").forEach(b=>{
+      const sh=el("div","fcellshot",b);
+      sh.style.background=FLASHBG[b];
+      shots.push(sh);film.append(sh);
+    });
+    const callBtn=el("button","btn primary","Call bases");
+    film.append(callBtn);
+    wrap.append(film);
+
+    const fastq=el("div","fastq");fastq.style.display="none";
+    fastq.innerHTML=
+`<span class="h">@BBB-RUN1:1:FC01:1:1101:1234:5678 1:N:0:${IDXSEQ[idxA]}</span>
+${read}
+<span class="h">+</span>
+<span class="q">IIIIIFII</span>   <span class="h">← Phred quality ≈ Q40: 1 error in 10,000 calls</span>`;
+    wrap.append(fastq);
+
+    const demuxWrap=el("div");demuxWrap.style.display="none";
+    demuxWrap.append(el("p","helper","Now the demultiplexer's turn — but you do it by hand, once, to feel it. Drag each read to its patient. The colored tag is the index the machine read alongside each insert."));
+    const readsRow=el("div","shelf");readsRow.style.borderTop="none";readsRow.style.paddingTop="4px";
+    const readDefs=[
+      {seq:read,idx:idxA},{seq:"GGATTCAC",idx:idxB},
+      {seq:"TTGCACGA",idx:idxA},{seq:"CATGGTCA",idx:idxB},
+    ];
+    const chips=[];
+    readDefs.forEach((r,i)=>{
+      const ch=makeChip({label:r.seq,sub:"index "+IDXSEQ[r.idx].slice(0,4)+"…",glyph:`<span style="display:block;width:15px;height:15px;border-radius:4px;background:${IDXCOL[r.idx]}"></span>`,payload:"read:"+i});
+      ch.style.fontFamily="var(--mono)";
+      chips.push(ch);readsRow.append(ch);
+    });
+    demuxWrap.append(readsRow);
+    const bins=el("div","bench");bins.style.marginTop="10px";
+    let sorted=0;
+    [["A",idxA],["B",idxB]].forEach(([k,idx])=>{
+      const bin=el("div","bin");
+      const bh=el("div","bh");
+      bh.append(el("span","sw",""),el("span","","Patient "+k+" · index "+idx));
+      bh.querySelector(".sw").style.background=IDXCOL[idx];
+      bin.append(bh);
+      bins.append(bin);
+      registerZone(bin,p=>{
+        if(!p.startsWith("read:"))return false;
+        const r=readDefs[+p.split(":")[1]];
+        if(r.idx!==idx)return "Index mismatch — this read's barcode belongs to the other patient. One wrong bin and a variant lands in the wrong report.";
+        const card=el("div","readcard");
+        const sw=el("span","idx");sw.style.background=IDXCOL[r.idx];
+        card.append(sw,el("span","",r.seq));
+        bin.append(card);
+        spend(chips[+p.split(":")[1]]);
+        sorted++;
+        if(sorted===4){
+          coach("All reads home. In a real run, software does this for billions of reads in minutes — because you gave each sample a unique barcode back at the bench.",true);
+          toast("Demultiplexing complete. 0 index hops.","good");
+          markDone();
+        }
+        return true;
+      });
+    });
+    demuxWrap.append(bins);
+    wrap.append(demuxWrap);
+    stage.append(wrap);
+
+    callBtn.addEventListener("click",()=>{
+      callBtn.disabled=true;
+      fastq.style.display="";
+      shots.forEach(s=>{s.style.color="#04211E";s.style.fontWeight="600";});
+      setTimeout(()=>{
+        demuxWrap.style.display="";
+        coach("There's your FASTQ record — the universal currency of sequencing. One more job: <b>demultiplex</b> the pooled reads.");
+      },400);
+      toast("Basecalling done — colors mapped to bases, with per-base quality.","good");
+    });
+  }
+},
+
+/* ---------------- 10 · Finale ---------------- */
+{
+  label:"Run complete",grp:"Finish",eyebrow:"Run summary",
+  title:"You just ran an Illumina workflow",
+  lede:"Every arrow in a sequencing pipeline diagram is something you now did with your own hands — and every reagent had a reason.",
+  autoDone:true,
+  build(stage){
+    coach("That's the whole journey: cells → clean DNA → library → clusters → flashes → FASTQ. Press <b>Run it again</b> to start fresh.",true);
+    const items=[
+      ["Lysis buffer","dissolved membranes and digested protein to <b>free the DNA</b>"],
+      ["SPRI beads + magnet","<b>purified</b> DNA away from cellular debris"],
+      ["Sonication","sheared DNA to <b>~420 bp</b> — and taught you not to over-pulse"],
+      ["End repair + A-tail","left every fragment with a <b>ligatable A-overhang</b>"],
+      ["Indexed adapters","made fragments <b>machine-readable</b> and <b>patient-traceable</b>"],
+      ["Capture probes","enriched the pool to just <b>BRCA1, TP53, EGFR</b>"],
+      ["Bridge amplification","grew each molecule into a <b>camera-visible cluster</b>"],
+      ["Reversible terminators","let the machine read <b>one glowing base per cycle</b>"],
+      ["Basecalling + demux","turned light into <b>FASTQ</b>, sorted by barcode"],
+    ];
+    const ul=el("ul","recap");
+    items.forEach(([k,v])=>{
+      const li=el("li");li.append(el("span","k",k),el("span","v",v));ul.append(li);
+    });
+    stage.append(ul);
+    stage.append(el("p","helper","Where next, if you're curious: paired-end reads (sequence both ends of each insert), patterned flow cells, index hopping, UMIs for counting molecules, and long-read platforms that skip fragmentation entirely."));
+  }
+},
+];
+
+/* ============================ boot ============================ */
+loadProg();
+renderRail();
+go(0);
+</script>
+</body>
+</html>
