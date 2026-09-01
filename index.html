@@ -401,6 +401,12 @@ button{font:inherit;color:inherit}
 .qrow{display:flex;gap:3px;margin-top:5px;width:max-content}
 .qb{width:26px;flex:0 0 26px;height:36px;display:flex;align-items:flex-end;justify-content:center}
 .qb i{display:block;width:12px;border-radius:2px 2px 0 0}
+.qbtn{
+  background:rgba(53,211,194,.14);border:1px solid rgba(53,211,194,.6);color:var(--glow);
+  border-radius:9px;padding:4px 16px;font-size:12.5px;font-weight:600;cursor:pointer;flex:0 0 auto;
+}
+.qbtn:hover{background:rgba(53,211,194,.26)}
+.qbtn[disabled]{opacity:.4;cursor:default;background:transparent;border-color:#33455F;color:#71829C}
 .rowlab{font-family:var(--mono);font-size:11px;color:#71829C;margin-left:10px;align-self:center;white-space:nowrap}
 .alnbox{position:relative;width:max-content;padding-bottom:44px}
 .readstrip{position:absolute;display:flex;gap:3px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transition:left .12s}
@@ -524,7 +530,7 @@ function attemptDrop(zel,payload,chipEl){
 }
 function unpick(){if(picked){picked.el.classList.remove("picked");picked=null;}}
 document.addEventListener("click",e=>{
-  if(picked&&!e.target.closest(".chip")&&!e.target.closest(".zone"))unpick();
+  if(picked&&!e.target.closest(".chip")&&!e.target.closest(".zone")&&!e.target.closest(".dragsrc"))unpick();
 },true);
 
 function makeChip(opts){
@@ -711,9 +717,10 @@ const SCENES=[
       ["04","End repair & A-tailing","Polish ragged ends so adapters can attach."],
       ["05","Adapter ligation","Add sequencing adapters and per-sample barcodes."],
       ["06","Hybrid capture","Pull out only the genes you care about."],
-      ["07","Flow cell & clusters","Seed strands on glass, amplify into clusters."],
-      ["08","Sequencing by synthesis","Build the complement one glowing base at a time."],
-      ["09","Basecalling & demux","Turn flashes into FASTQ and sort reads by barcode."],
+      ["07","Pooling","Combine the enriched libraries — barcodes keep them apart."],
+      ["08","Flow cell & clusters","Seed strands on glass, amplify into clusters."],
+      ["09","Sequencing by synthesis","Build the complement one glowing base at a time."],
+      ["10","Basecalling & demux","Turn flashes into FASTQ and sort reads by barcode."],
     ];
     const steps2=[
       ["B1","Read QC & trimming","Cut low-quality tails and adapter read-through."],
@@ -1226,12 +1233,12 @@ const SCENES=[
       }
       if(p==="wash"){
         if(phase!=="wash")return "Not yet — bind and pin the targets before washing, or you'll lose them.";
-        phase="pool";
+        phase="done";
         frags.forEach(f=>{if(!f.el.classList.contains("captured"))f.el.classList.add("washed");});
         note.innerHTML="Captured: <b>3 / 3 targets</b><br>Off-target: washed away<br>Enrichment: ~99% reads on-panel";
-        coach("Only your panel remains — for <i>each</i> sample. Last bench move: press <b>Pool libraries</b> to combine the enriched samples for one run.");
+        coach("Only your panel remains — and the same happened in <i>each</i> patient's tube. Next: pool the enriched libraries for one run.",true);
         toast("Off-target DNA washed away. Enrichment complete.","good");
-        poolBtn.disabled=false;
+        markDone();
         return true;
       }
       return false;
@@ -1242,28 +1249,89 @@ const SCENES=[
     targets.forEach(t=>{
       shelf.append(makeChip({label:t.gene+" probe",sub:"biotinylated ssDNA",glyph:GL.probe(t.col),payload:"probe:"+t.gene}));
     });
-    const poolBtn=el("button","btn primary","Pool libraries");poolBtn.disabled=true;
     shelf.append(
       makeChip({label:"Streptavidin beads",sub:"magnetic",glyph:GL.beads(),payload:"beadsSA"}),
       makeChip({label:"Magnet",sub:"",glyph:GL.magnet(),payload:"magnet"}),
       makeChip({label:"Wash buffer",sub:"stringent, heated",glyph:GL.bottle("#9FB2CC"),payload:"wash"}),
-      poolBtn,
     );
     stage.append(shelf);
-    poolBtn.addEventListener("click",()=>{
-      if(poolBtn.disabled)return;
-      poolBtn.disabled=true;
-      note.innerHTML="Pooled: Patient A + Patient B<br>Each read traceable by its <b>index barcode</b><br>Ready for the sequencer: <b>yes</b>";
-      coach("One tube, every sample, distinguishable forever by the barcodes you ligated. That's multiplexing — and the wet lab's enrichment work is done.",true);
-      toast("Enriched libraries pooled for sequencing.","good");
-      markDone();
+  }
+},
+
+/* ---------------- 7 · Pooling ---------------- */
+{
+  label:"Pooling",grp:"Enrichment",eyebrow:"Step 7 · Pooling",
+  title:"Two libraries, one run",
+  lede:"Each patient's enriched library still sits in its own tube. A sequencing run is expensive — so equal (equimolar) amounts of every library are combined into one pool, and the index barcodes you ligated in step 5 keep every fragment traceable to its patient.",
+  build(stage){
+    coach("Drag <b>each patient's tube</b> into the sequencing pool.");
+    const bench=el("div","bench");
+    const IDXCOL={D701:"var(--idx1)",D702:"var(--idx2)"};
+    const idxA=RUN.idxA||"D701",idxB=RUN.idxB||"D702";
+    const mkTube=(name,small)=>{
+      const tw=el("div","tube-wrap");
+      tw.append(el("div","tube-name",name));
+      const tube=el("div","tube");
+      if(small){tube.style.width="90px";tube.style.height="150px";}
+      const liq=el("div","liquid");
+      liq.style.background="linear-gradient(180deg,rgba(53,211,194,.10),rgba(53,211,194,.2))";
+      tube.append(liq);tw.append(tube);
+      return {tw,tube,liq};
+    };
+    const mkFrag=(col,topPct)=>{
+      const f=el("div","frag");
+      f.style.cssText=`position:absolute;left:16%;right:16%;top:${topPct}%;height:14px;gap:3px`;
+      const t=el("div","strand"),b=el("div","strand bot");
+      t.style.width="100%";b.style.width="100%";
+      const lA=el("span","adTag showq"),rA=el("span","adTag showq");
+      lA.style.cssText="left:-8px;background:"+col;rA.style.cssText="right:-8px;background:"+col;
+      f.append(t,b,lA,rA);
+      return f;
+    };
+    const tubes={};
+    [["A",idxA],["B",idxB]].forEach(([k,idx])=>{
+      const t=mkTube("Patient "+k,true);
+      [22,54].forEach(top=>t.liq.append(mkFrag(IDXCOL[idx],top)));
+      makeDragSource(t.tube,"lib:"+k,GL.tube(IDXCOL[idx]));
+      bench.append(t.tw);
+      tubes[k]={...t,idx,poured:false};
+    });
+    const poolT=mkTube("Sequencing pool");
+    bench.append(poolT.tw);
+    const note=el("div","readout","Pool contents:<br>· —<br>· —<br>Normalized: equimolar");
+    bench.append(note);
+    stage.append(bench);
+
+    let poured=0;const tops=[10,26,42,58];
+    registerZone(poolT.tube,(p)=>{
+      if(!p.startsWith("lib:"))return false;
+      const k=p.split(":")[1],t=tubes[k];
+      if(t.poured)return "Patient "+k+"'s library is already in the pool.";
+      t.poured=true;poured++;
+      // library leaves its tube…
+      t.liq.style.height="16%";
+      t.liq.querySelectorAll(".frag").forEach(f=>f.style.opacity="0");
+      t.tube.style.cursor="default";
+      // …and lands in the pool
+      const base=poured===1?0:2;
+      [tops[base],tops[base+1]].forEach(top=>poolT.liq.append(mkFrag(IDXCOL[t.idx],top)));
+      note.innerHTML="Pool contents:<br>· Patient A: "+(tubes.A.poured?"<b>in</b> (index "+tubes.A.idx+")":"—")+"<br>· Patient B: "+(tubes.B.poured?"<b>in</b> (index "+tubes.B.idx+")":"—")+"<br>Normalized: equimolar";
+      if(poured===2){
+        coach("One tube, both patients — fragments mingled but forever distinguishable by their barcode colors. That's multiplexing, and the wet lab is done with tubes.",true);
+        toast("Libraries pooled, equimolar. Ready for the sequencer.","good");
+        markDone();
+      }else{
+        coach("One in. Pour the other patient's library into the pool too.");
+        toast("Patient "+k+"'s library added to the pool.","good");
+      }
+      return true;
     });
   }
 },
 
-/* ---------------- 7 · Flow cell ---------------- */
+/* ---------------- 8 · Flow cell ---------------- */
 {
-  label:"Flow cell",grp:"Sequencing",eyebrow:"Step 7 · On the instrument",
+  label:"Flow cell",grp:"Sequencing",eyebrow:"Step 8 · On the instrument",
   title:"Seed the flow cell, grow the clusters",
   lede:"The flow cell is a glass channel carpeted with a lawn of oligos matching the adapters. Single-stranded library hybridizes to the lawn, then <b>bridge amplification</b> copies each molecule into a tight cluster of ~1,000 clones — bright enough for the camera to see.",
   build(stage){
@@ -1404,7 +1472,7 @@ const SCENES=[
 
 /* ---------------- 8 · SBS ---------------- */
 {
-  label:"Sequencing",grp:"Sequencing",eyebrow:"Step 8 · Sequencing by synthesis",
+  label:"Sequencing",grp:"Sequencing",eyebrow:"Step 9 · Sequencing by synthesis",
   title:"Read it by building it",
   lede:"Each cycle, one fluorescent, reversibly-terminated nucleotide is incorporated opposite the template base. The camera photographs the flash, the terminator and dye are cleaved, and the next cycle begins. You are the polymerase — pair each base correctly.",
   build(stage){
@@ -1504,7 +1572,7 @@ const SCENES=[
 
 /* ---------------- 9 · Basecalling & demux ---------------- */
 {
-  label:"Basecalling",grp:"Analysis",eyebrow:"Step 9 · From light to data",
+  label:"Basecalling",grp:"Analysis",eyebrow:"Step 10 · From light to data",
   title:"Flashes become files",
   lede:"The instrument's software converts each cluster's photo sequence into bases with quality scores — the FASTQ format. Then the index barcodes you ligated in step 5 are read too, and every read is <b>demultiplexed</b> back to its patient.",
   build(stage){
@@ -1609,7 +1677,8 @@ ${read}
       ["Sonication","sheared DNA to <b>~420 bp</b> — and taught you not to over-pulse"],
       ["End repair + A-tail","left every fragment with a <b>ligatable A-overhang</b>"],
       ["Indexed adapters","made fragments <b>machine-readable</b> and <b>patient-traceable</b>"],
-      ["Capture probes","enriched each library to just <b>BRCA1, TP53, EGFR</b> — then pooled for one run"],
+      ["Capture probes","enriched each library to just <b>BRCA1, TP53, EGFR</b>"],
+      ["Pooling","combined the libraries, <b>equimolar</b>, barcodes keeping them apart"],
       ["Bridge amplification","grew each molecule into a <b>camera-visible cluster</b>"],
       ["Reversible terminators","let the machine read <b>one glowing base per cycle</b>"],
       ["Basecalling + demux","turned light into <b>FASTQ</b>, sorted by barcode"],
@@ -2097,7 +2166,7 @@ chr17   43106487  .   A   C   58   PASS   DP=6;AF=0.50  GT:AD  <span class="q">?
       const rr=el("div","rrow");rr.style.cssText="display:flex;gap:12px;padding:7px 0;border-bottom:1px dashed #26364F;align-items:center";
       rr.append(el("span","rk",d.name));
       const rv=el("span","","<span style='color:#71829C'>— not queried —</span>");rv.style.cssText="font-size:13.5px;flex:1";
-      const qb=el("button","btn","Query");qb.style.cssText="padding:4px 14px;font-size:12.5px;flex:0 0 auto";
+      const qb=el("button","qbtn","Query");
       qb.addEventListener("click",()=>{
         qb.disabled=true;
         evRows[k].innerHTML=DB[k].res;
