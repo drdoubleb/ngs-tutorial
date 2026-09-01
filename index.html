@@ -1613,7 +1613,7 @@ ${read}
     ];
     const chips=[];
     readDefs.forEach((r,i)=>{
-      const ch=makeChip({label:r.seq,sub:"index "+IDXSEQ[r.idx],glyph:`<span style="display:block;width:15px;height:15px;border-radius:4px;background:${IDXCOL[r.idx]}"></span>`,payload:"read:"+i});
+      const ch=makeChip({label:r.seq,sub:"index "+r.idx+" · "+IDXSEQ[r.idx],glyph:`<span style="display:block;width:15px;height:15px;border-radius:4px;background:${IDXCOL[r.idx]}"></span>`,payload:"read:"+i});
       ch.style.whiteSpace="nowrap";
       ch.style.fontFamily="var(--mono)";
       chips.push(ch);readsRow.append(ch);
@@ -1624,7 +1624,7 @@ ${read}
     [["A",idxA],["B",idxB]].forEach(([k,idx])=>{
       const bin=el("div","bin");
       const bh=el("div","bh");
-      bh.append(el("span","sw",""),el("span","","Patient "+k+" · index "+idx));
+      bh.append(el("span","sw",""),el("span","","Patient "+k+" · index "+idx+" · <span style='font-family:var(--mono);font-weight:500;color:var(--muted)'>"+IDXSEQ[idx]+"</span>"));
       bh.querySelector(".sw").style.background=IDXCOL[idx];
       bin.append(bh);
       bins.append(bin);
