@@ -47,8 +47,9 @@ State (which barcode each patient got, the read you sequenced) carries through
 the scenes and across the modules, so the run tells one continuous story — the
 read you build in sequencing-by-synthesis is the read you later align. Progress
 is saved in `localStorage`. The interpretation scene uses the documented
-pathogenic BRCA1 founder variant c.181T>G; database summaries are simplified
-for teaching (predictor scores illustrative) and are not clinical assertions.
+pathogenic BRCA1 variant c.181T>G with values summarized from real ClinVar,
+gnomAD v4.1, COSMIC and predictor annotations (simplified to one transcript);
+they are teaching material, not clinical assertions.
 
 ## Tech notes
 
