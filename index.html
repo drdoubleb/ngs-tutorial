@@ -638,6 +638,7 @@ const GL={
   adapter:c=>`<svg width="24" height="26" viewBox="0 0 24 26"><path d="M10.4 23V13C10.4 9.5 9.5 7.5 5.5 3.5" fill="none" stroke="#3E7FC7" stroke-width="2.2" stroke-linecap="round"/><path d="M13.6 23V13C13.6 9.5 14.5 7.5 18.5 3.5" fill="none" stroke="#2F62A8" stroke-width="2.2" stroke-linecap="round"/><rect x="7.6" y="16.5" width="8.8" height="5.5" rx="2" fill="${c}"/></svg>`,
   probe:c=>`<svg width="26" height="20" viewBox="0 0 26 20"><path d="M2 12q3-7 6 0t6 0 6 0" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/><circle cx="23" cy="6" r="3.2" fill="#EDE28A"/></svg>`,
   zap:()=>`<svg width="20" height="24" viewBox="0 0 20 24"><path d="M11 2 3 14h6l-2 8 10-13h-6z" fill="#FBBF24"/></svg>`,
+  fluor:c=>`<svg width="26" height="26" viewBox="0 0 26 26"><circle cx="13" cy="13" r="4.6" fill="${c}"/><circle cx="13" cy="13" r="6.8" fill="${c}" opacity=".25"/><g stroke="${c}" stroke-width="2" stroke-linecap="round"><path d="M13 1.8v3.6M13 20.6v3.6M1.8 13h3.6M20.6 13h3.6M5.1 5.1l2.5 2.5M18.4 18.4l2.5 2.5M20.9 5.1l-2.5 2.5M7.6 18.4l-2.5 2.5"/></g></svg>`,
   scis:()=>`<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="6" cy="17" r="3" fill="none" stroke="#5A6E8C" stroke-width="2"/><circle cx="6" cy="7" r="3" fill="none" stroke="#5A6E8C" stroke-width="2"/><path d="M8.5 15.5 20 4M8.5 8.5 20 20" stroke="#B54B45" stroke-width="2.2" stroke-linecap="round"/></svg>`,
   flag:c=>`<svg width="20" height="24" viewBox="0 0 20 24"><path d="M5 22V3" stroke="#5A6E8C" stroke-width="2.2" stroke-linecap="round"/><path d="M5 4h11l-3.2 4 3.2 4H5z" fill="${c}"/></svg>`,
   chipbase:(c,t)=>`<span style="width:22px;height:22px;border-radius:6px;background:${c};color:#fff;font-family:var(--mono);font-weight:600;font-size:13px;display:grid;place-items:center">${t||""}</span>`,
@@ -1085,7 +1086,7 @@ const SCENES=[
     stage.append(bench);
 
     const IDXCOL={D701:"var(--idx1)",D702:"var(--idx2)"};
-    let ligChip,poolBtn;
+    let ligChip;
     function refreshNote(){
       note.innerHTML="Pooling plan:<br>Patient A → index <b style='color:"+(tubes.A.idx?IDXCOL[tubes.A.idx]:"inherit")+"'>"+(tubes.A.idx||"—")+"</b><br>Patient B → index <b style='color:"+(tubes.B.idx?IDXCOL[tubes.B.idx]:"inherit")+"'>"+(tubes.B.idx||"—")+"</b>";
     }
@@ -1121,8 +1122,8 @@ const SCENES=[
           toast("Ligase sealed the nicks — adapters are now covalently attached (Patient "+k+").","good");
           if(tubes.A.ligated&&tubes.B.ligated){
             ligChip.classList.add("spent");
-            coach("Both libraries complete. Press <b>Pool libraries</b> to combine them for one run.");
-            poolBtn.disabled=false;
+            coach("Two finished libraries, each wearing its own barcode. They stay separate through enrichment — pooling comes after capture, two steps from now.",true);
+            markDone();
           }else{
             coach("One sealed. Ligase onto the other tube too.");
           }
@@ -1135,26 +1136,12 @@ const SCENES=[
     const shelf=el("div","shelf");
     shelf.append(el("div","shelf-label","Adapter plate & enzymes"));
     ligChip=makeChip({label:"T4 DNA ligase",sub:"seals adapter to insert",glyph:GL.enzyme("var(--violet)"),payload:"ligase"});
-    poolBtn=el("button","btn primary","Pool libraries");poolBtn.disabled=true;
     shelf.append(
       makeChip({label:"Adapter · index D701",sub:"ATTACTCG",glyph:GL.adapter("var(--idx1)"),payload:"D701"}),
       makeChip({label:"Adapter · index D702",sub:"TCCGGAGA",glyph:GL.adapter("var(--idx2)"),payload:"D702"}),
-      ligChip,poolBtn,
+      ligChip,
     );
     stage.append(shelf);
-
-    poolBtn.addEventListener("click",()=>{
-      poolBtn.disabled=true;
-      tubes.B.tube.parentElement.style.transition="all .8s";
-      tubes.B.tube.parentElement.style.opacity="0";
-      tubes.B.tube.parentElement.style.transform="translateX(-60px)";
-      tubes.A.tube.parentElement.querySelector(".tube-name").textContent="Pooled library";
-      const extra=tubes.A.tray.children[1];
-      if(extra){extra.querySelectorAll(".adTag").forEach(a=>a.style.background=IDXCOL[tubes.B.idx]);}
-      coach("One tube, two patients, distinguishable forever by their barcodes. That's multiplexing.",true);
-      toast("Libraries pooled.","good");
-      markDone();
-    });
   }
 },
 
@@ -1162,7 +1149,7 @@ const SCENES=[
 {
   label:"Hybrid capture",grp:"Enrichment",eyebrow:"Step 6 · Target enrichment",
   title:"Pull out the genes that matter",
-  lede:"Sequencing a whole genome to look at three genes is wasteful. Biotinylated probes — synthetic single strands complementary to your targets — hybridize only to matching fragments. Streptavidin beads then grab the biotin, and everything else washes away.",
+  lede:"Sequencing a whole genome to look at three genes is wasteful. Biotinylated probes — synthetic single strands complementary to your targets — hybridize only to matching fragments. Streptavidin beads then grab the biotin, everything else washes away — and only then are the enriched samples pooled for the run.",
   build(stage){
     const targets=[
       {gene:"BRCA1",col:"var(--rose)"},
@@ -1239,12 +1226,12 @@ const SCENES=[
       }
       if(p==="wash"){
         if(phase!=="wash")return "Not yet — bind and pin the targets before washing, or you'll lose them.";
-        phase="done";
+        phase="pool";
         frags.forEach(f=>{if(!f.el.classList.contains("captured"))f.el.classList.add("washed");});
         note.innerHTML="Captured: <b>3 / 3 targets</b><br>Off-target: washed away<br>Enrichment: ~99% reads on-panel";
-        coach("Only your panel remains. Every sequencing dollar now lands on BRCA1, TP53 and EGFR.",true);
+        coach("Only your panel remains — for <i>each</i> sample. Last bench move: press <b>Pool libraries</b> to combine the enriched samples for one run.");
         toast("Off-target DNA washed away. Enrichment complete.","good");
-        markDone();
+        poolBtn.disabled=false;
         return true;
       }
       return false;
@@ -1255,12 +1242,22 @@ const SCENES=[
     targets.forEach(t=>{
       shelf.append(makeChip({label:t.gene+" probe",sub:"biotinylated ssDNA",glyph:GL.probe(t.col),payload:"probe:"+t.gene}));
     });
+    const poolBtn=el("button","btn primary","Pool libraries");poolBtn.disabled=true;
     shelf.append(
       makeChip({label:"Streptavidin beads",sub:"magnetic",glyph:GL.beads(),payload:"beadsSA"}),
       makeChip({label:"Magnet",sub:"",glyph:GL.magnet(),payload:"magnet"}),
       makeChip({label:"Wash buffer",sub:"stringent, heated",glyph:GL.bottle("#9FB2CC"),payload:"wash"}),
+      poolBtn,
     );
     stage.append(shelf);
+    poolBtn.addEventListener("click",()=>{
+      if(poolBtn.disabled)return;
+      poolBtn.disabled=true;
+      note.innerHTML="Pooled: Patient A + Patient B<br>Each read traceable by its <b>index barcode</b><br>Ready for the sequencer: <b>yes</b>";
+      coach("One tube, every sample, distinguishable forever by the barcodes you ligated. That's multiplexing — and the wet lab's enrichment work is done.",true);
+      toast("Enriched libraries pooled for sequencing.","good");
+      markDone();
+    });
   }
 },
 
@@ -1283,9 +1280,10 @@ const SCENES=[
     bench.append(tw);
     // visible duplexes: two paired bars per molecule, split apart on denaturation
     const dups=[];
+    const spots=[[10,10,-12],[46,26,18],[14,46,8],[44,64,-20]]; // fixed, non-overlapping
     for(let i=0;i<4;i++){
       const d=el("div");
-      d.style.cssText=`position:absolute;left:${rand(8,55)}%;top:${rand(12,72)}%;transform:rotate(${rand(-25,25)}deg)`;
+      d.style.cssText=`position:absolute;left:${spots[i][0]}%;top:${spots[i][1]}%;transform:rotate(${spots[i][2]}deg)`;
       const b1=el("div"),b2=el("div");
       b1.style.cssText="width:26px;height:3px;border-radius:2px;background:#3E7FC7;margin-bottom:2px;transition:transform .9s";
       b2.style.cssText="width:26px;height:3px;border-radius:2px;background:#2F62A8;transition:transform .9s";
@@ -1498,7 +1496,7 @@ const SCENES=[
     const shelf=el("div","shelf");
     shelf.append(el("div","shelf-label","Fluorescent nucleotides · reversible terminators"));
     ["A","C","G","T"].forEach(b=>{
-      shelf.append(makeChip({label:b,sub:"dNTP",cls:"vial",glyph:GL.drop(BASECOL[b]),payload:"nt:"+b}));
+      shelf.append(makeChip({label:b,sub:"dNTP",cls:"vial",glyph:GL.fluor(BASECOL[b]),payload:"nt:"+b}));
     });
     stage.append(shelf);
   }
@@ -1547,7 +1545,8 @@ ${read}
     ];
     const chips=[];
     readDefs.forEach((r,i)=>{
-      const ch=makeChip({label:r.seq,sub:"index "+IDXSEQ[r.idx].slice(0,4)+"…",glyph:`<span style="display:block;width:15px;height:15px;border-radius:4px;background:${IDXCOL[r.idx]}"></span>`,payload:"read:"+i});
+      const ch=makeChip({label:r.seq,sub:"index "+IDXSEQ[r.idx],glyph:`<span style="display:block;width:15px;height:15px;border-radius:4px;background:${IDXCOL[r.idx]}"></span>`,payload:"read:"+i});
+      ch.style.whiteSpace="nowrap";
       ch.style.fontFamily="var(--mono)";
       chips.push(ch);readsRow.append(ch);
     });
@@ -1610,7 +1609,7 @@ ${read}
       ["Sonication","sheared DNA to <b>~420 bp</b> — and taught you not to over-pulse"],
       ["End repair + A-tail","left every fragment with a <b>ligatable A-overhang</b>"],
       ["Indexed adapters","made fragments <b>machine-readable</b> and <b>patient-traceable</b>"],
-      ["Capture probes","enriched the pool to just <b>BRCA1, TP53, EGFR</b>"],
+      ["Capture probes","enriched each library to just <b>BRCA1, TP53, EGFR</b> — then pooled for one run"],
       ["Bridge amplification","grew each molecule into a <b>camera-visible cluster</b>"],
       ["Reversible terminators","let the machine read <b>one glowing base per cycle</b>"],
       ["Basecalling + demux","turned light into <b>FASTQ</b>, sorted by barcode"],
@@ -2073,7 +2072,7 @@ chr17   43106487  .   A   C   58   PASS   DP=6;AF=0.50  GT:AD  <span class="q">?
   title:"From coordinate to consequence",
   lede:"Annotation places your VCF row in the genome: it lands in <b>BRCA1</b> — a real, well-documented variant, <b>c.181T>G (p.Cys61Gly)</b>. Software can name it; deciding what it <i>means</i> takes evidence. Query the world's databases, then make the call.",
   build(stage){
-    coach("First, gather evidence: drag each <b>database query</b> card onto the results screen.");
+    coach("First, gather evidence: press <b>Query</b> on each of the four databases.");
     const t=el("div","term");
     t.append(el("div","tlab","annotation · BRCA1 · GRCh38"));
     const anno=el("div","fastq");anno.style.cssText="background:none;border:none;padding:0;margin:0";
@@ -2086,7 +2085,7 @@ chr17   43106487  .   A   C   58   PASS   DP=6;AF=0.50  GT:AD  <span class="q">?
     stage.append(t);
 
     const ev=el("div","term evres");ev.style.marginTop="14px";
-    ev.append(el("div","tlab","evidence — drop a query card here"));
+    ev.append(el("div","tlab","evidence"));
     const DB={
       clinvar:{name:"ClinVar",res:"<b>Pathogenic</b> — reviewed by expert panel (ENIGMA), dozens of submitters agree"},
       gnomad:{name:"gnomAD",res:"exome AF ≈ <b>0.0017%</b> (25 / 1,452,604 alleles, v4.1) · genome AF 0.0033% — very rare in the population"},
@@ -2095,10 +2094,22 @@ chr17   43106487  .   A   C   58   PASS   DP=6;AF=0.50  GT:AD  <span class="q">?
     };
     const evRows={};let queried=0;
     Object.entries(DB).forEach(([k,d])=>{
-      const rr=el("div","rrow");rr.style.cssText="display:flex;gap:12px;padding:7px 0;border-bottom:1px dashed #26364F;align-items:baseline";
+      const rr=el("div","rrow");rr.style.cssText="display:flex;gap:12px;padding:7px 0;border-bottom:1px dashed #26364F;align-items:center";
       rr.append(el("span","rk",d.name));
-      const rv=el("span","","<span style='color:#71829C'>— not queried —</span>");rv.style.fontSize="13.5px";
-      rr.append(rv);evRows[k]=rv;ev.append(rr);
+      const rv=el("span","","<span style='color:#71829C'>— not queried —</span>");rv.style.cssText="font-size:13.5px;flex:1";
+      const qb=el("button","btn","Query");qb.style.cssText="padding:4px 14px;font-size:12.5px;flex:0 0 auto";
+      qb.addEventListener("click",()=>{
+        qb.disabled=true;
+        evRows[k].innerHTML=DB[k].res;
+        queried++;
+        if(queried===4){
+          coach("The evidence is concordant. Now the human step: drag your <b>classification</b> onto the report — Benign, VUS, or Pathogenic?");
+          toast("All four sources answered.","good");
+        }else{
+          toast(DB[k].name+" answered.","good");
+        }
+      });
+      rr.append(rv,qb);evRows[k]=rv;ev.append(rr);
     });
     stage.append(ev);
     stage.append(el("p","helper","Values summarized from real ClinVar, gnomAD v4.1, COSMIC and predictor annotations for this variant, simplified to one transcript for teaching — for clinical work, always consult the live records."));
@@ -2115,23 +2126,8 @@ chr17   43106487  .   A   C   58   PASS   DP=6;AF=0.50  GT:AD  <span class="q">?
     });
     stage.append(report);
 
-    registerZone(ev,p=>{
-      if(!p.startsWith("db:"))return p.startsWith("verdict:")?"The verdict goes on the report card below — once the evidence is in.":false;
-      const k=p.split(":")[1];
-      if(!evRows[k])return false;
-      if(evRows[k].dataset.done)return DB[k].name+" has already answered.";
-      evRows[k].innerHTML=DB[k].res;evRows[k].dataset.done="1";
-      queried++;
-      if(queried===4){
-        coach("The evidence is concordant. Now the human step: drag your <b>classification</b> onto the report — Benign, VUS, or Pathogenic?");
-        toast("All four sources answered.","good");
-      }else{
-        toast(DB[k].name+" answered.","good");
-      }
-      return true;
-    });
     registerZone(rows["classification"],p=>{
-      if(!p.startsWith("verdict:"))return p.startsWith("db:")?"Query cards go on the evidence screen above.":false;
+      if(!p.startsWith("verdict:"))return false;
       if(queried<4)return "Classify only on full evidence — query all four sources first.";
       const v=p.split(":")[1];
       if(v==="benign")return "An allele frequency of 0.0017% is far too rare for a benign polymorphism — and ClinVar's expert panel plus every predictor point the other way.";
@@ -2147,12 +2143,8 @@ chr17   43106487  .   A   C   58   PASS   DP=6;AF=0.50  GT:AD  <span class="q">?
     });
 
     const shelf=el("div","shelf");
-    shelf.append(el("div","shelf-label","Database queries & verdict cards"));
+    shelf.append(el("div","shelf-label","Verdict cards"));
     shelf.append(
-      makeChip({label:"ClinVar",sub:"clinical assertions",glyph:GL.chipbase("var(--C)","Cl"),payload:"db:clinvar"}),
-      makeChip({label:"gnomAD",sub:"population frequency",glyph:GL.chipbase("var(--teal)","gA"),payload:"db:gnomad"}),
-      makeChip({label:"Predictors",sub:"REVEL · AlphaMissense · SpliceAI",glyph:GL.chipbase("var(--violet)","fx"),payload:"db:pred"}),
-      makeChip({label:"COSMIC",sub:"somatic occurrences",glyph:GL.chipbase("var(--idx2)","Co"),payload:"db:cosmic"}),
       makeChip({label:"Benign",sub:"no clinical concern",glyph:GL.flag("var(--A)"),payload:"verdict:benign"}),
       makeChip({label:"VUS",sub:"uncertain significance",glyph:GL.flag("#8494A9"),payload:"verdict:vus"}),
       makeChip({label:"Pathogenic",sub:"disease-causing",glyph:GL.flag("var(--T)"),payload:"verdict:path"}),
