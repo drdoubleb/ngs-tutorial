@@ -37,17 +37,18 @@ reagent, then click its destination), and wrong moves get an explanation of
 | # | Step | Interaction |
 |---|------|-------------|
 | B1 | Read QC & trimming | Cut the low-quality tail where Phred drops below Q20; scan for and clip adapter read-through |
-| B2 | Alignment | Slide the read you sequenced along the reference, watch the ±1 score, beat the decoy near-match |
-| B3 | Indels & CIGAR | Drag a 2-base gap into the right junction; watch the CIGAR go 8M → 4M2D4M |
+| B2 | Alignment | Slide three reads (including the one you sequenced) to their best-scoring homes and stack a pileup |
+| B3 | Indels & CIGAR | Grab the mismatching half of a read and stretch a gap open; the CIGAR updates live (8M → 4M2D4M) |
 | B4 | Sort & dedup | `samtools sort` the pile, then flag the PCR duplicates (keeping the best-quality copy) |
 | B5 | Variant calling | Flag the true heterozygous SNV column, reject the low-quality error column, call the genotype |
-| B6 | Annotation | Apply the alt allele to a BRCA1 codon, derive Arg→His, classify it as missense |
+| B6 | Interpretation | A real variant — BRCA1 c.181T>G (p.Cys61Gly): query ClinVar/gnomAD/predictors/COSMIC, then classify it |
 
 State (which barcode each patient got, the read you sequenced) carries through
 the scenes and across the modules, so the run tells one continuous story — the
 read you build in sequencing-by-synthesis is the read you later align. Progress
-is saved in `localStorage`. Genomic coordinates in module 2 are illustrative,
-not clinical assertions.
+is saved in `localStorage`. The interpretation scene uses the documented
+pathogenic BRCA1 founder variant c.181T>G; database summaries are simplified
+for teaching (predictor scores illustrative) and are not clinical assertions.
 
 ## Tech notes
 
