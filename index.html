@@ -440,12 +440,17 @@ button{font:inherit;color:inherit}
   #brand .home{display:none}
   #steps{flex-direction:row;align-items:center}
   #steps .grp{display:none}
+  #steps .mod{display:none}
   #steps li.step button{padding:6px}
   #steps li.step button .lbl{display:none}
   #railfoot{display:none}
   #scenewrap{padding:22px 16px 70px}
   #stage{padding:16px}
-  .pool{min-width:0}
+  .bench{gap:18px}
+  .bench .readout{flex:1 1 100%}       /* status box drops below the graphic */
+  .pool{flex:1 1 100%;min-width:0}
+  .pfrag{max-width:36%}
+  .sbswrap{overflow-x:auto;padding-bottom:4px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
@@ -474,6 +479,7 @@ button{font:inherit;color:inherit}
       <section id="stage"></section>
       <div id="nav">
         <button class="btn" id="backBtn">Back</button>
+        <button class="btn" id="resetBtn" title="Restart this step from scratch">↺ Reset step</button>
         <button class="btn primary" id="nextBtn">Next step</button>
       </div>
     </div>
@@ -501,7 +507,7 @@ const RUN={
 let toastT=null;
 function toast(msg,kind){
   const t=$("#toast");t.textContent=msg;t.className="show"+(kind?" "+kind:"");
-  clearTimeout(toastT);toastT=setTimeout(()=>t.className="",3600);
+  clearTimeout(toastT);toastT=setTimeout(()=>t.className="",7200);
 }
 function coach(msg,win){
   $("#coachtext").innerHTML=msg;
@@ -701,6 +707,7 @@ function go(i){
   window.scrollTo({top:0,behavior:"instant"});
 }
 $("#backBtn").addEventListener("click",()=>{if(current>0)go(current-1);});
+$("#resetBtn").addEventListener("click",()=>{go(current);toast("Step reset — fresh start.");});
 $("#nextBtn").addEventListener("click",()=>{
   if(current===SCENES.length-1){unlocked=0;saveProg();go(0);return;}
   if(current<SCENES.length-1)go(current+1);
