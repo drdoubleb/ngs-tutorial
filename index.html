@@ -166,8 +166,11 @@ button{font:inherit;color:inherit}
 }
 .ghostmini{
   position:fixed;z-index:99;pointer-events:none;margin:0;
-  transform:translate(-50%,-58%) scale(1.8);transform-origin:center;
+  transform:translate(-50%,-58%) scale(2.2);transform-origin:center;
   filter:drop-shadow(0 5px 10px rgba(15,35,60,.4));
+}
+@media (pointer:coarse){
+  .ghostmini{transform:translate(-50%,-58%) scale(2.8)}
 }
 
 /* ---------- drop zones ---------- */
@@ -574,7 +577,8 @@ function makeChip(opts){
       c.classList.add("dragging");
     }
     if(draggingStarted){
-      ghost.style.left=e.clientX+"px";ghost.style.top=e.clientY+"px";
+      ghost.style.left=e.clientX+"px";
+      ghost.style.top=(e.pointerType==="touch"?e.clientY-56:e.clientY)+"px";
       const z=zoneAt(e.clientX,e.clientY);
       zones.forEach(zz=>zz.el.classList.toggle("hot",zz===z));
     }
@@ -620,7 +624,8 @@ function makeDragSource(elm,payload,ghostHtml){
       ghost=el("div","ghostmini",ghostHtml);document.body.appendChild(ghost);
     }
     if(dragging){
-      ghost.style.left=e.clientX+"px";ghost.style.top=e.clientY+"px";
+      ghost.style.left=e.clientX+"px";
+      ghost.style.top=(e.pointerType==="touch"?e.clientY-56:e.clientY)+"px";
       const z=zoneAt(e.clientX,e.clientY);
       zones.forEach(zz=>zz.el.classList.toggle("hot",zz===z&&zz.el!==elm));
     }
