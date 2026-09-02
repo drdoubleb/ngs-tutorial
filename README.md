@@ -8,11 +8,8 @@ required.
 
 ## Run it
 
-Open `index.html` in any modern browser. That's it.
-
-To host it publicly, enable **GitHub Pages** for this repo (Settings → Pages →
-deploy from the main branch, root folder) and it will be served at
-`https://<user>.github.io/ngs-tutorial/`.
+Live at **[drdoubleb.com/ngs-tutorial](https://drdoubleb.com/ngs-tutorial)** —
+or open `index.html` in any modern browser; it's fully self-contained.
 
 ## What you do in it
 

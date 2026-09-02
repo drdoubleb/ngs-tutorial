@@ -58,6 +58,11 @@ button{font:inherit;color:inherit}
   display:flex;flex-direction:column;gap:20px;position:sticky;top:0;height:100vh;overflow-y:auto;
 }
 #brand{padding:0 6px}
+#brand .home{
+  display:inline-block;font-size:11px;letter-spacing:.05em;color:var(--faint);
+  text-decoration:none;margin-bottom:9px;
+}
+#brand .home:hover{color:var(--teal)}
 #brand .word{
   font-family:var(--disp);font-weight:800;font-size:21px;letter-spacing:.2px;line-height:1.1;
 }
@@ -432,6 +437,7 @@ button{font:inherit;color:inherit}
   #app{flex-direction:column}
   #rail{width:auto;flex:none;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;padding:12px 14px;gap:14px;border-right:none;border-bottom:1px solid var(--line-soft)}
   #brand .sub{display:none}
+  #brand .home{display:none}
   #steps{flex-direction:row;align-items:center}
   #steps .grp{display:none}
   #steps li.step button{padding:6px}
@@ -450,6 +456,7 @@ button{font:inherit;color:inherit}
 <div id="app">
   <aside id="rail">
     <div id="brand">
+      <a class="home" href="https://drdoubleb.com">← drdoubleb.com</a>
       <div class="word">Base <b>by</b> Base</div>
       <div class="sub">Illumina NGS · hands on</div>
     </div>
