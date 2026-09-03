@@ -536,6 +536,19 @@ function zoneAt(x,y){
   }
   return null;
 }
+/* On touch the ghost floats 56px above the finger, so accept a hit at either
+   point. When the two points land on different zones (e.g. a fragment vs the
+   pool behind it), prefer the smaller, more specific target. */
+function zoneAtDrag(e,exclude){
+  const pick=(x,y)=>{const z=zoneAt(x,y);return z&&z.el!==exclude?z:null;};
+  const a=pick(e.clientX,e.clientY);
+  if(e.pointerType!=="touch")return a;
+  const b=pick(e.clientX,e.clientY-56);
+  if(!a)return b;
+  if(!b||b===a)return a;
+  const area=z=>{const r=z.el.getBoundingClientRect();return r.width*r.height;};
+  return area(b)<area(a)?b:a;
+}
 function attemptDrop(zel,payload,chipEl){
   const z=zones.find(z=>z.el===zel);if(!z)return;
   unpick();
@@ -579,7 +592,7 @@ function makeChip(opts){
     if(draggingStarted){
       ghost.style.left=e.clientX+"px";
       ghost.style.top=(e.pointerType==="touch"?e.clientY-56:e.clientY)+"px";
-      const z=zoneAt(e.clientX,e.clientY);
+      const z=zoneAtDrag(e);
       zones.forEach(zz=>zz.el.classList.toggle("hot",zz===z));
     }
   });
@@ -587,7 +600,7 @@ function makeChip(opts){
     if(!start||e.pointerId!==start.id)return;
     zones.forEach(zz=>zz.el.classList.remove("hot"));
     if(draggingStarted){
-      const z=zoneAt(e.clientX,e.clientY);
+      const z=zoneAtDrag(e);
       ghost.remove();ghost=null;c.classList.remove("dragging");
       if(z)attemptDrop(z.el,c.payload,c);
     }else{
@@ -626,17 +639,17 @@ function makeDragSource(elm,payload,ghostHtml){
     if(dragging){
       ghost.style.left=e.clientX+"px";
       ghost.style.top=(e.pointerType==="touch"?e.clientY-56:e.clientY)+"px";
-      const z=zoneAt(e.clientX,e.clientY);
-      zones.forEach(zz=>zz.el.classList.toggle("hot",zz===z&&zz.el!==elm));
+      const z=zoneAtDrag(e,elm);
+      zones.forEach(zz=>zz.el.classList.toggle("hot",zz===z));
     }
   });
   const fin=e=>{
     if(!start||e.pointerId!==start.id)return;
     zones.forEach(zz=>zz.el.classList.remove("hot"));
     if(dragging){
-      const z=zoneAt(e.clientX,e.clientY);
+      const z=zoneAtDrag(e,elm);
       ghost.remove();ghost=null;
-      if(z&&z.el!==elm)attemptDrop(z.el,payload,elm);
+      if(z)attemptDrop(z.el,payload,elm);
     }else if(picked&&picked.el!==elm){
       /* a reagent is picked and this element is also a zone — let the zone's click handler take it */
     }else if(picked&&picked.el===elm){unpick();}
