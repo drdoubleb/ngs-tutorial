@@ -2231,7 +2231,7 @@ chr17   43106487  .   A   C   58   PASS   DP=6;AF=0.50  GT:AD  <span class="q">?
       if(!p.startsWith("verdict:"))return false;
       if(queried<4)return "Classify only on full evidence — query all four sources first.";
       const v=p.split(":")[1];
-      if(v==="benign")return "An allele frequency of 0.0017% is far too rare for a benign polymorphism — and ClinVar's expert panel plus every predictor point the other way.";
+      if(v==="benign")return "Most evidence points the other way- make sure you've run all queries.";
       if(v==="vus")return "VUS is for thin or conflicting evidence. Here the lines agree: an expert-panel ClinVar assertion, rarity in gnomAD, and damaging predictions.";
       rows["classification"].textContent="Pathogenic";rows["classification"].className="rv";
       rows["classification"].style.color="var(--T)";
